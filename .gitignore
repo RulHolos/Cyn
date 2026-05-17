@@ -1,0 +1,8 @@
+*.exe
+*.log
+*.dll
+*.ini
+/plugins/plugins.json
+/userdata
+/logs
+.vscode

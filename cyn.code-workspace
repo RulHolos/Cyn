@@ -1,0 +1,19 @@
+{
+    "folders": [
+        {
+            "name": "Cyn",
+            "path": "."
+        },
+    ],
+    "settings": {
+        "Lua.runtime.version": "LuaJIT",
+        "Lua.workspace.library": [
+            "Cyn/docs"
+        ],
+        "git.openRepositoryInParentFolders": "always",
+        "Lua.diagnostics.disable": [
+            "lowercase-global",
+            "inject-field"
+        ]
+    }
+}

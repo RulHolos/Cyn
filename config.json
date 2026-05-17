@@ -1,0 +1,61 @@
+{
+    "include": [
+        {
+            "path": "userdata/settings.json",
+            "optional": true
+        }
+    ],
+    "application": {
+        "uuid": "7dc2bbf1-578c-49d3-9f8a-0cf649760da7"
+    },
+    "logging": {
+        "debugger": {
+            "enable": true,
+            "threshold": "debug"
+        },
+        "console": {
+            "enable": true,
+            "threshold": "debug",
+            "preserve": true
+        },
+        "file": {
+            "enable": false,
+            "threshold": "info",
+            "path": "game.log"
+        },
+        "rolling_file": {
+            "enable": true,
+            "threshold": "info",
+            "path": "logs/",
+            "max_history": 10
+        }
+    },
+    "file_system": {
+        "resources": [
+            {
+                "name": "data",
+                "type": "directory",
+                "path": "data/"
+            },
+            {
+                "name": "assets",
+                "type": "directory",
+                "path": "assets/"
+            },
+            {
+                "name": "i18n",
+                "type": "directory",
+                "path": "i18n/"
+            }
+        ],
+        "user": "userdata/"
+    },
+    "timing": {
+        "frame_rate": 60
+    },
+    "window": {
+        "title": "LuaSTG-Flux - Cyn v0.10a",
+        "cursor_visible": true,
+        "allow_window_corner": true
+    }
+}

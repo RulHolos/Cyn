@@ -54,7 +54,7 @@
         "frame_rate": 60
     },
     "window": {
-        "title": "LuaSTG-Flux - Cyn v0.10a",
+        "title": "Cyn v0.10a",
         "cursor_visible": true,
         "allow_window_corner": true
     }

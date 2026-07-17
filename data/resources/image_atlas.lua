@@ -2,6 +2,8 @@
 local M = {
     name = "",
     type = "atlas",
+    ---@type table<string, resource.image> Sub-images loaded from this atlas, keyed by name suffix.
+    parts = {},
 }
 resources.image_atlas = M
 
@@ -39,12 +41,17 @@ function M.from_texture(tex)
 end
 
 function M:destroy()
+    for _, img in pairs(self.parts) do
+        lstg.RemoveResource(lstg.GetResourceStatus(), "img", img.name)
+    end
+    self.parts = {}
     lstg.RemoveResource(lstg.GetResourceStatus(), "tex", self.name)
-    --TODO: Also clear any other resources created by this atlas
 end
 
 function M:get_parts_count()
-    --TODO: Return the number of resources of this atlas
+    local count = 0
+    for _ in pairs(self.parts) do count = count + 1 end
+    return count
 end
 
 ---@return boolean
@@ -62,3 +69,93 @@ function M:set_sampler_state(sampler_state)
 end
 
 -------------- Methods
+
+---Returns a sub-image previously loaded from this atlas, or nil if not found.
+---@param name_suffix string
+---@return resource.image?
+function M:get_image(name_suffix)
+    return self.parts[name_suffix]
+end
+
+---Defines a sub-image from this atlas.
+---@param name_suffix string Unique name for the sub-image.
+---@param x number X offset in the texture (pixels).
+---@param y number Y offset in the texture (pixels).
+---@param w number Width of the sub-image (pixels).
+---@param h number Height of the sub-image (pixels).
+---@param a number? Collision width.
+---@param b number? Collision height (defaults to `a`).
+---@param rect boolean? Use rectangular collision.
+---@return resource.image
+function M:add_image(name_suffix, x, y, w, h, a, b, rect)
+    local name = self.name .. "/" .. name_suffix
+    lstg.LoadImage(name, self.name, x, y, w, h, a or 0, b or a or 0, rect or false)
+    local img = makeInstance(resources.image)
+    img.name = name
+    img.width = w
+    img.height = h
+    img.a = a or 0
+    img.b = b or a or 0
+    self.parts[name_suffix] = img
+    return img
+end
+
+---Defines a horizontal strip of animation frames from this atlas.
+---@param name_prefix string Prefix for each frame name (frame index is appended).
+---@param x number X offset of the first frame (pixels).
+---@param y number Y offset of the strip (pixels).
+---@param w number Width of each frame (pixels).
+---@param h number Height of each frame (pixels).
+---@param count integer Number of frames.
+---@param a number? Collision width.
+---@param b number? Collision height (defaults to `a`).
+---@param rect boolean? Use rectangular collision.
+---@return resource.image[]
+function M:add_animation_strip(name_prefix, x, y, w, h, count, a, b, rect)
+    local frames = {}
+    for i = 1, count do
+        local name = self.name .. "/" .. name_prefix .. i
+        lstg.LoadImage(name, self.name, x + (i - 1) * w, y, w, h, a or 0, b or a or 0, rect or false)
+        local img = makeInstance(resources.image)
+        img.name = name
+        img.width = w
+        img.height = h
+        img.a = a or 0
+        img.b = b or a or 0
+        img.rect = rect or false
+        frames[i] = img
+        self.parts[name_prefix .. i] = img
+    end
+    return frames
+end
+
+---Defines a grid of sub-images from this atlas, to left-to-right and top-to-bottom.
+---@param name_prefix string Prefix for each image name (1-based index is appended).
+---@param x number X offset of the top-left cell (pixels).
+---@param y number Y offset of the top-left cell (pixels).
+---@param w number Width of each cell (pixels).
+---@param h number Height of each cell (pixels).
+---@param cols integer Number of columns.
+---@param rows integer Number of rows.
+---@param a number? Collision width.
+---@param b number? Collision height (defaults to `a`).
+---@param rect boolean? Use rectangular collision.
+---@return resource.image[]
+function M:add_image_group(name_prefix, x, y, w, h, cols, rows, a, b, rect)
+    local images = {}
+    for i = 0, cols * rows - 1 do
+        local suffix = name_prefix .. (i + 1)
+        local name = self.name .. "/" .. suffix
+        lstg.LoadImage(name, self.name, x + w * (i % cols), y + h * math.floor(i / cols), w, h, a or 0, b or a or 0, rect or false)
+        local img = makeInstance(resources.image)
+        img.name = name
+        img.width = w
+        img.height = h
+        img.a = a or 0
+        img.b = b or a or 0
+        img.rect = rect or false
+        images[i + 1] = img
+        self.parts[suffix] = img
+    end
+    return images
+end

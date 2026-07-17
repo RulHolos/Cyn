@@ -126,7 +126,7 @@ end
 ---Renders this image at the specified coordinates.
 ---@param x number
 ---@param y number
----@param rot number In degrees
+---@param rot number? In degrees
 ---@param hscale number? Horizontal scale (1.0 by default)
 ---@param vscale number? If nil, uses the value of `hscale`.
 ---@param z number? Z index

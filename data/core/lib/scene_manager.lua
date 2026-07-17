@@ -96,7 +96,7 @@ function stage_group:advance()
     return name
 end
 
----@class stage_manager
+---@class core.stage_manager
 ---@field stages table<string, stage>
 ---@field groups table<string, stage_group>
 ---@field current_stage stage?

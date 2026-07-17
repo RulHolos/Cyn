@@ -4,26 +4,31 @@ local Behavior = require("core.lib.player.behavior")
 ---@field behaviors table<string, core.player.behavior>
 local M = core.object.define()
 core.player = M
-core.player.instances = {}
+---@type core.player|nil
+core.player.instance = nil
 core.player.behavior = Behavior
+---@type table<{obj:core.player, name:string, full_name:string}>
+core.player.selectable_players = {}
 
----@param player_index string e.g "p1". Links to the input system for default indexing.
----@return core.player|nil The player instance for the given index, or nil if not found.
-function M.get_instance_at(player_index)
-    return core.player.instances[player_index]
-end
+core.player.b_move = require("core.lib.player.default_behaviors.move") ---Default movement behavior.
+core.player.b_death = require("core.lib.player.default_behaviors.death") ---Default death behavior.
+core.player.b_animation = require("core.lib.player.default_behaviors.animation") ---Default animation behavior. Similar to THlib's player walk image.
+core.player.b_power = require("core.lib.player.default_behaviors.power") ---Default power level behavior.
 
----@param player_index string e.g "p1". Links to the input system for default indexing.
-function M:init(player_index)
-    self.pindex = player_index --Player control index. e.g "p1"
-    self.x, self.y = 0, 0
+function M:init()
+    ---TODO: Get those names from selectable_players
+    self.name = "Placeholder"
+    self.full_name = "Placeholder Full Name"
+    self.x, self.y = 0, -192
     self.a, self.b = 4.5, 4.5
     self.layer = core.object.layer.PLAYER
     self.group = core.object.group.PLAYER
     ---@type table<string, core.player.behavior>
     self.behaviors = {}
+    self.protect = 0
+    self.in_dialog = false
 
-    core.player.instances[player_index] = self
+    core.player.instance = self
 
     --self:attach_behavior(d)
 end
@@ -32,6 +37,8 @@ function M:frame()
     for _, b in pairs(self.behaviors) do
         b:frame()
     end
+
+    self.protect = math.max(self.protect - 1, 0)
 end
 
 function M:render()
@@ -54,19 +61,20 @@ function M:del()
     end
     self.behaviors = {}
 
-    core.player.instances[self.pindex] = nil
+    core.player.instance = nil
 end
 
 -------------------------- Behaviors
 
 ---Attaches a behavior to the player. Calls `init`.
----@param behavior core.player.behavior The behavior class to attach.
----@return core.player.behavior @The created behavior instance.
-function M:attach_behavior(behavior)
+---@generic T : core.player.behavior
+---@param behavior { name: string, new: fun(self: any, player: core.player, ...): T } The behavior class to attach.
+---@return T Instance The created behavior instance.
+function M:attach_behavior(behavior, ...)
     if self.behaviors[behavior.name] then
         self:detach_behavior(behavior.name)
     end
-    local instance = behavior:new(self)
+    local instance = behavior:new(self, ...)
     self.behaviors[behavior.name] = instance
     return instance
 end
@@ -81,11 +89,12 @@ function M:detach_behavior(name)
     end
 end
 
----Returns an attached behavior by name, or nil if not found.
----@param name string
----@return core.player.behavior?
-function M:get_behavior(name)
-    return self.behaviors[name]
+---Returns an attached behavior by class, or nil if not found.
+---@generic T : core.player.behavior
+---@param behavior { name: string, new: fun(self: any, player: core.player, ...): T } The behavior class.
+---@return T?
+function M:get_behavior(behavior)
+    return self.behaviors[behavior.name]
 end
 
 -------------------------- Helpers
@@ -127,5 +136,13 @@ function M:find_target(farthest)
     return self.target
 end
 
-require("core.lib.player.default_behaviors.death")
-require("core.lib.player.default_behaviors.move")
+---Registers a selectable player character. Used for selection screens mainly.
+---@param obj core.player Object definition class
+---@param name string Short name for the character, e.g "Reimu"
+---@param full_name string Full name for the character, e.g "Reimu Hakurei"
+function M.register_player(obj, name, full_name)
+    if not M.selectable_players then
+        M.selectable_players = {}
+    end
+    table.insert(M.selectable_players, { obj = obj, name = name, full_name = full_name })
+end

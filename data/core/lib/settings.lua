@@ -33,31 +33,17 @@ local default_settings = {
         height = 480
     },
     keys = {
-        p1 = {
-            Up = keyboard.Up,
-            Down = keyboard.Down,
-            Right = keyboard.Right,
-            Left = keyboard.Left,
-            Shoot = keyboard.Z,
-            Bomb = keyboard.X,
-            Special = keyboard.C,
-            Focus = keyboard.LeftShift,
-            Retry = keyboard.R,
-            Snapshot = keyboard.Home,
-        },
-        p2 = {
-            Up = keyboard.W,
-            Down = keyboard.S,
-            Right = keyboard.D,
-            Left = keyboard.A,
-            Shoot = keyboard.G,
-            Bomb = keyboard.H,
-            Special = keyboard.J,
-            Focus = keyboard.LeftShift,
-            Retry = keyboard.R,
-            Snapshot = keyboard.Home,
-        },
-    },
+        Up = keyboard.Up,
+        Down = keyboard.Down,
+        Right = keyboard.Right,
+        Left = keyboard.Left,
+        Shoot = keyboard.Z,
+        Bomb = keyboard.X,
+        Special = keyboard.C,
+        Focus = keyboard.LeftShift,
+        Retry = keyboard.R,
+        Snapshot = keyboard.Home,
+    }
 }
 
 local function get_settings_file()

@@ -1,15 +1,16 @@
 ---@class core.player.behavior
 ---@field name string
 ---@field player core.player
----@field init fun(self) Called when the behavior is attached to a player.
+---@field init fun(self, ...) Called when the behavior is attached to a player.
 ---@field frame fun(self) Called every frame.
 ---@field render fun(self) Called every render frame.
 ---@field colli fun(self, other) Called when the player collides with another object.
 ---@field del fun(self) Called when the behavior is detached from the player.
+---@field debug fun(self) Called when the player debug is rendered in ImGui.
 local Behavior = {}
 Behavior.__index = Behavior
 
-local noop = function(self) end
+local noop = function(self, ...) end
 
 ---Defines a new behavior type.
 ---@param name string The unique name for this behavior.
@@ -24,16 +25,19 @@ function Behavior.define(name)
     b.render = noop
     b.colli = noop
     b.del = noop
+    b.debug = nil -- Nil since it won't trigger if not defined.
     return b
 end
 
+---@generic T : core.player.behavior
+---@param self T
 ---@param player core.player
----@return core.player.behavior
-function Behavior:new(player)
+---@return T
+function Behavior:new(player, ...)
     ---@type core.player.behavior
     local instance = setmetatable({}, self)
     instance.player = player
-    instance:init()
+    instance:init(...)
     return instance
 end
 

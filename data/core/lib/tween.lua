@@ -1,4 +1,4 @@
-local Easing = require("core.lib.tween.easing")
+local Easing = require("core.global_scripts.easing")
 
 ---@class core.tween
 local M = {}

@@ -35,13 +35,13 @@ end
 ---@param volume number Volume multiplier [0, 1].
 function M:set_volume(volume)
     self.volume = volume
-    lstg.SetSEVolume(self.name, volume)
+    lstg.SetSEVolume(self.name, tonumber(volume) or 1)
 end
 
 ---Gets the current volume of this sound.
 ---@return number Volume [0, 1]
 function M:get_volume()
-    return self.volume
+    return tonumber(self.volume) or 1
 end
 
 ---Gets the current state of this sound.

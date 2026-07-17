@@ -130,8 +130,12 @@ function resources.Transfer(from, t, name, to)
 end
 
 require("resources.image")
+require("resources.image_atlas")
 require("resources.texture")
 require("resources.music")
 require("resources.sound")
 require("resources.ninepatch")
 require("resources.video")
+require("resources.ttf")
+
+require("resources.audio_manager")

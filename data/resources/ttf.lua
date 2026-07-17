@@ -37,3 +37,10 @@ end
 
 -------------- State
 
+---Changes the color and blendmode of the image.
+---@param blendmode BlendMode
+---@param color lstg.Color
+function M:set_state(blendmode, color)
+    lstg.RichText:setState(blendmode, color)
+    self.blendmode = blendmode
+end

@@ -31,3 +31,8 @@ end
 
 -------------- State
 
+---Sets a video looping or not
+---@param enabled boolean whether the video should loop at the end.
+function M:set_loop(enabled)
+    lstg.SetVideoLoop(self.name, enabled)
+end

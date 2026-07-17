@@ -89,7 +89,7 @@ function M.New(target, f)
         _g = g,
     }
     g.list[#g.list + 1] = entry
-    return setmetatable({ _e = entry}, Handle)
+    return setmetatable({ _e = entry }, Handle)
 end
 
 ---Executes all current tasks in a target.
@@ -115,7 +115,7 @@ function M.Do(target)
 
                 local ok, err = resume(co)
 
-                co_stack[co_stack] = nil
+                co_stack[co_stack_n] = nil
                 co_stack_n = co_stack_n - 1
                 target_stack[target_stack_n] = nil
                 target_stack_n = target_stack_n - 1
@@ -170,7 +170,7 @@ function M.Clear(target, reserve_current)
     local g = rawget(target, FIELD)
     if not g then return end
 
-    local list     = g.list
+    local list = g.list
     local reserved = nil
 
     if reserve_current then
@@ -185,23 +185,21 @@ function M.Clear(target, reserve_current)
         end
     end
 
-    -- Mark everything dead (except the reserved entry)
     for i = 1, #list do
         local e = list[i]
         if e ~= reserved then
             e.dead = true
-            e._g   = nil
+            e._g = nil
         end
     end
 
     if g.depth > 0 then
-        -- Mid-Do: leave compaction to the deferred sweep
         g.dirty = true
     else
         if reserved then
             for i = 1, #list do list[i] = nil end
-            list[1]  = reserved
-            g.dirty  = false
+            list[1] = reserved
+            g.dirty = false
         else
             rawset(target, FIELD, nil)
         end

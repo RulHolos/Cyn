@@ -80,10 +80,10 @@ function core.screen:setup(resetWorld)
             core.world_camera:reset()
         else
             core.world = {
-                l = -200, r = 200, b = -224, t = 224,
-                boundl = -232, boundr = 232, boundb = -256, boundt = 256,
-                scrl = 0, scrr = 400, scrb = 0, scrt = 448,
-                pl = -200, pr = 200, pb = -224, pt = 224,
+                l = -192, r = 192, b = -224, t = 224,
+                boundl = -224, boundr = 224, boundb = -256, boundt = 256,
+                scrl = 6, scrr = 390, scrb = 16, scrt = 464,
+                pl = -192, pr = 192, pb = -224, pt = 224,
             }
             lstg.SetBound(core.world.boundl, core.world.boundr, core.world.boundb, core.world.boundt)
             core.world_camera:reset()
@@ -179,9 +179,9 @@ function core.world:hardReset()
     local d = {}
     for k, v in pairs(_WORLD_DEFAULT) do
         d[k] = type(v) == "table" and (function(t)
-            local c={}
+            local c = {}
             for kk, vv in pairs(t) do
-                c[kk]=vv
+                c[kk] = vv
             end
             return c
         end)(v) or v
@@ -332,7 +332,7 @@ function core.camera3d:reset()
 end
 
 ---Configures camera view. All fields are optional.
----@param cfg { eye:{x:number,y:number,z:number}?, at:{x:number,y:number,z:number}?, up:{x:number,y:number,z:number}?, fov:number?, depth:{near:number,far:number}?, fog:{start:number,finish:number,color:number}? }
+---@param cfg { eye:{x:number,y:number,z:number}?, at:{x:number,y:number,z:number}?, up:{x:number,y:number,z:number}?, fov:number?, depth:{near:number,far:number}?, fog:{start:number,finish:number,color:lstg.Color}? }
 function core.camera3d:set(cfg)
     local s = self._state
     if cfg.eye then s.eye = { cfg.eye.x, cfg.eye.y, cfg.eye.z } end
@@ -401,16 +401,20 @@ function core.view:set(mode)
     if mode == "world" then
         local l, r, b, t = core.world_camera:getTransformedBounds()
         lstg.SetOrtho(l, r, b, t)
+        lstg.SetEffekseerView2D((l + r) * 0.5, (b + t) * 0.5, r - l, t - b)
         viewport(w.scrl, w.scrr, w.scrb, w.scrt)
         lstg.SetFog()
         lstg.SetImageScale(1)
     elseif mode == "ui" then
         lstg.SetOrtho(0, sc.width, 0, sc.height)
+        lstg.SetEffekseerView2D(sc.halfW, sc.halfH, sc.width, sc.height)
         viewport(0, sc.width, 0, sc.height)
         lstg.SetFog()
         lstg.SetImageScale(1)
     elseif mode == "screen" then
-        lstg.SetOrtho(0, core.userdata.settings.graphics_system.width, 0, core.userdata.settings.graphics_system.height)
+        local gw = core.userdata.settings.graphics_system.width
+        local gh = core.userdata.settings.graphics_system.height
+        lstg.SetOrtho(0, gw, 0, gh)
         lstg.SetViewport(0, sc.width, sc.height, 0)
         lstg.SetScissorRect(0, sc.width, sc.height, 0)
         lstg.SetFog()
@@ -423,7 +427,7 @@ function core.view:set(mode)
             cam.at[1], cam.at[2], cam.at[3],
             cam.up[1], cam.up[2], cam.up[3],
             cam.fovy,
-            sc.width / sc.height,
+            (w.scrr - w.scrl) / (w.scrt - w.scrb),
             cam.depth[1], cam.depth[2]
         )
         lstg.SetFog(cam.fog.start, cam.fog.finish, cam.fog.color)

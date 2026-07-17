@@ -138,6 +138,8 @@
 ---@field Display lstg.Display
 ---@field Window lstg.Window
 ---@field DiscordRPC lstg.DiscordRPC
+---@field Texture2D lstg.Texture2D
+---@field Sprite lstg.Sprite
 ---
 ---Constructors
 ---@field Rand fun() : RNG Creates a RNG object.
@@ -170,6 +172,25 @@
 ---@field LoadFX fun(name:string, path:string) Loads a shader resource. The shader format should be `hlsl`.
 ---@field LoadModel fun(name:string, path:string) Loads a model. Supported formats are `gltf`, `glb`.
 ---@field LoadVideo fun(name:string, path:string) Loads a video resource from a file. Supported formats are `mp4`, `mov`, `mkv`, `avi`. Make sure to use compatible codecs (MPEG-4 or H-264) for better compatibility.
+---
+---Async Resource Loaders (Flux only)
+---Each async loader accepts a table of request tables, an optional defaults table (same fields, used as fallback), and an optional pool name (`"global"` or `"stage"`, or any other custom pool name).
+---All functions return a `lstg.LoadingTask` which can be polled each frame or blocked on with `wait()`.
+---@field LoadTextureAsync fun(requests:{name:string, path:string, mipmaps:boolean?, width:integer?, height:integer?}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads textures into a resource pool. Each request requires `name` and `path`.
+---@field LoadSpriteAsync fun(requests:{name:string, texture:string, x:number, y:number, w:number, h:number, anchor_x:number?, anchor_y:number?, rect:boolean?}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads sprites into a resource pool. Each request requires `name`, `texture`, `x`, `y`, `w`, `h`.
+---@field LoadAnimationAsync fun(requests:{name:string, texture:string, x:number, y:number, w:number, h:number, n:integer, m:integer, interval:integer, anchor_x:number?, anchor_y:number?, rect:boolean?, sprites:string[]?}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads animations into a resource pool. Each request requires `name`, `texture`, `x`, `y`, `w`, `h`, `n`, `m`, `interval`.
+---@field LoadMusicAsync fun(requests:{name:string, path:string, loop_start:number?, loop_end:number?, once_decode:boolean?}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads music into a resource pool. Each request requires `name` and `path`.
+---@field LoadSoundAsync fun(requests:{name:string, path:string}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads sound effects into a resource pool. Each request requires `name` and `path`.
+---@field LoadFontAsync fun(requests:{name:string, path:string, width:number, height:number?}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads TTF fonts into a resource pool. Each request requires `name`, `path`, and `width`.
+---@field LoadSpriteFontAsync fun(requests:{name:string, path:string, tex_path:string?, mipmaps:boolean?}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads HGE sprite fonts into a resource pool. Each request requires `name` and `path`.
+---@field LoadFXAsync fun(requests:{name:string, path:string}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads shaders into a resource pool. Each request requires `name` and `path`.
+---@field LoadModelAsync fun(requests:{name:string, path:string}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads models into a resource pool. Each request requires `name` and `path`.
+---@field LoadParticleAsync fun(requests:{name:string, path:string, img_name:string, anchor_x:number?, anchor_y:number?, rect:boolean?}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads HGE particle systems into a resource pool. Each request requires `name`, `path`, and `img_name`.
+---@field LoadVideoAsync fun(requests:{name:string, path:string}[], defaults?:table, pool?:string) : lstg.LoadingTask Asynchronously loads videos into a resource pool. Each request requires `name` and `path`.
+---@field GetAsyncLoaderThreadCount fun() : integer Returns the number of worker threads used by the async resource loader.
+---@field SetAsyncLoaderMaxItemsPerFrame fun(count:integer) Sets the maximum number of GPU upload operations processed per frame by the async loader.
+---@field GetAsyncLoaderMaxItemsPerFrame fun() : integer Returns the current maximum GPU upload operations per frame limit.
+---@field ClearAsyncLoaderTasks fun() Cancels and removes all pending async loading tasks. Resources already committed to the GPU are not affected.
 ---
 ---Resource State
 ---@field SetTextureSamplerState fun(name:string, sampler_state:SamplerState) Sets the given texture sampler state.
@@ -353,6 +374,53 @@
 ---@field GetCurrentSuperPause fun(...) Undocumented
 ---@field ParticleSystemData fun(...) Undocumented
 ---@field MeshData fun(...) Undocumented
+
+---------------------------------------
+---Async loading types (Flux only)
+---------------------------------------
+
+---@class lstg.LoadingTask.Result
+---@field name string Name of the resource as specified in the request.
+---@field success boolean Whether the resource was loaded successfully.
+---@field type ResourceType The type of the resource.
+---@field error string? Error message, only present when `success` is `false`.
+
+---Represents a resource loading task returned by the async loader functions (e.g. `lstg.LoadTextureAsync`).
+---Poll `isCompleted` each frame, or call `wait` to block until done.
+---@class lstg.LoadingTask
+---@field getId fun(self:lstg.LoadingTask) : integer Returns the unique ID of this task.
+---@field getProgress fun(self:lstg.LoadingTask) : integer, integer Returns the number of completed items and the total item count.
+---@field isCompleted fun(self:lstg.LoadingTask) : boolean Returns `true` when all resources have finished loading or the task was cancelled.
+---@field isCancelled fun(self:lstg.LoadingTask) : boolean Returns `true` if the task was cancelled via `cancel()`.
+---@field getStatus fun(self:lstg.LoadingTask) : "pending"|"loading"|"completed"|"failed"|"cancelled" Returns the current status of the task.
+---@field cancel fun(self:lstg.LoadingTask) Requests cancellation of the task. Resources already committed to the GPU remain loaded.
+---@field wait fun(self:lstg.LoadingTask) Blocks until the task completes or is cancelled. Do not call from the main game loop.
+---@field getResults fun(self:lstg.LoadingTask) : lstg.LoadingTask.Result[] Returns an array of result tables, one per requested resource, in submission order.
+
+---Represents an async texture loading task from the Modern API. Returned by `lstg.Texture2D.loadAsync`.
+---@class lstg.AsyncTexture2DTask
+---@field getProgress fun(self:lstg.AsyncTexture2DTask) : integer, integer Returns the number of completed and total textures.
+---@field isCompleted fun(self:lstg.AsyncTexture2DTask) : boolean Returns `true` when all textures have finished loading.
+---@field wait fun(self:lstg.AsyncTexture2DTask) Blocks until the task completes or is cancelled.
+---@field cancel fun(self:lstg.AsyncTexture2DTask) Cancels the task.
+---@field getTextures fun(self:lstg.AsyncTexture2DTask) : lstg.Texture2D[] Returns an array of loaded `Texture2D` objects in submission order. Failed entries are `nil`.
+
+---Represents an async sprite loading task from the Modern API. Returned by `lstg.Sprite.loadAsync`.
+---@class lstg.AsyncSpriteTask
+---@field getProgress fun(self:lstg.AsyncSpriteTask) : integer, integer Returns the number of completed and total sprites.
+---@field isCompleted fun(self:lstg.AsyncSpriteTask) : boolean Returns `true` when all sprites have finished loading.
+---@field wait fun(self:lstg.AsyncSpriteTask) Blocks until the task completes or is cancelled.
+---@field cancel fun(self:lstg.AsyncSpriteTask) Cancels the task.
+---@field getSprites fun(self:lstg.AsyncSpriteTask) : lstg.Sprite[] Returns an array of loaded `Sprite` objects in submission order. Failed entries are `nil`.
+
+---Modern API texture handle. Obtained from `lstg.Texture2D.loadAsync`.
+---Not a named resource pool entry — use directly as input to `lstg.Sprite.loadAsync`.
+---@class lstg.Texture2D
+---@field loadAsync fun(paths:string[], mipmaps:boolean?) : lstg.AsyncTexture2DTask Asynchronously loads textures from file paths. `mipmaps` defaults to `true`. Returns an `AsyncTexture2DTask`.
+
+---Modern API sprite handle. Obtained from `lstg.Sprite.loadAsync`.
+---@class lstg.Sprite
+---@field loadAsync fun(sprites:{texture:string|lstg.Texture2D, x:number, y:number, w:number, h:number, anchor_x:number?, anchor_y:number?, rect:boolean?}[], defaults?:{texture?:string|lstg.Texture2D, rect?:boolean, anchor_x?:number, anchor_y?:number}) : lstg.AsyncSpriteTask Asynchronously loads sprites from a texture name or Texture2D handle. Returns an `AsyncSpriteTask`.
 
 ---------------------------------------
 ---All of these represents modules that can be loaded, usualy from "modern"(namespace) Sub/Flux functions.

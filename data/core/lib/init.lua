@@ -10,6 +10,9 @@
 ---@field input core.input
 ---@field object core.object
 ---@field tween core.tween
+---@field player core.player
+---@field background core.background
+---@field stage_manager core.stage_manager
 local M = {}
 core = M
 core.__index = M
@@ -59,11 +62,15 @@ function M.class(base)
     return class
 end
 
+require("core.lib.cdf")
+require("i18n") --Don't ask why it's there. It just is...
+
+require("core.lib.task")
+require("core.lib.signals")
 require("core.lib.userdata")
 require("core.lib.settings")
 require("core.lib.objects")
 require("core.lib.task")
-require("core.lib.signals")
 require("core.lib.tween")
 require("core.lib.debug")
 require("core.lib.screen")
@@ -72,6 +79,9 @@ require("core.lib.random")
 require("core.lib.ui")
 require("core.lib.input")
 
+require("core.lib.misc")
+require("core.lib.item")
 require("core.lib.player")
+require("core.lib.background")
 
 require("core.lib.mainloop")

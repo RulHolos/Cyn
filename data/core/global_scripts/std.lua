@@ -6,6 +6,7 @@ debug_data = {
 }
 
 lume = require("core.global_scripts.lume")
+toml = require("core.global_scripts.toml")
 
 -------------------------------- Strings
 ---@param str string
@@ -173,7 +174,60 @@ table.foreach_pairs = function(tbl, predicate, action)
 	end
 end
 
+---Recursively prints a table, with key sorting and infinite recursion prevention.
+---@param t table Table to print
+---@param idt integer|nil Identation
+---@param seen table|nil Subtable visit tracker
+table.print = function(t, idt, seen)
+	local idt = idt or 0
+	local idtStr = string.rep("  ⤷ ", idt)
+
+	local seen = seen or {}
+	seen[t] = true
+
+	local keys = {}
+	for k in pairs(t) do
+		keys[#keys + 1] = k
+	end
+
+	table.sort(keys, function(a, b)
+		if type(a) == "number" and type(b) == "number" then
+			return a < b
+		end
+		return tostring(a) < tostring(b)
+	end)
+
+	for i = 1, #keys do
+        local key = keys[i]
+        local val = t[key]
+
+        if type(key) == "string" then
+            key = idtStr .. "[\"" .. key .. "\"]"
+        else
+            key = idtStr .. "[" .. tostring(key) .. "]"
+        end
+
+        if type(val) == "table" and not seen[val] then
+            seen[val] = true
+            print(key .. ":")
+            table.print(val, idt + 1, seen)
+            seen[val] = nil
+
+        else
+            print(key .. " = " .. tostring(val))
+        end
+    end
+end
+
 -------------------------------- Math
+
+math.PIx2 = math.pi * 2
+math.PI_2 = math.pi * 0.5
+math.PI_4 = math.pi * 0.25
+math.SQRT2 = math.sqrt(2)
+math.SQRT3 = math.sqrt(3)
+math.SQRT2_2 = math.sqrt(0.5)
+math.GOLD = 360 * (math.sqrt(5) - 1) / 2
 
 if not math.mod then
 	math.mod = function(a, b)
@@ -202,4 +256,20 @@ end
 function math.wrap(value, min, max)
 	local range = max - min + 1
 	return ((value - min) % range + range) % range + min
+end
+
+-------------------------------- Log
+
+function lstg.MsgBoxWarn(msg)
+	local ret = lstg.MessageBox("Warning", tostring(msg), 49)
+	if ret == 2 then
+		core.quit_flag = true
+	end
+end
+
+function lstg.MsgBoxError(msg, title, exit)
+	local ret = lstg.MessageBox(title, tostring(msg), 16)
+	if ret == 1 and exit then
+		core.quit_flag = true
+	end
 end

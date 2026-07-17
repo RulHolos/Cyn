@@ -36,12 +36,11 @@ table.insert(all_classes, object)
 M.base = object
 
 local function equivalent(self, target)
-    self.init = target.init
-    self.del = target.del
-    self.frame = target.frame
-    self.render = target.render
-    self.colli = target.colli
-    self.kill = target.kill
+    for k, v in pairs(target) do
+        if type(k) ~= "number" and k ~= "is_class" and k ~= "base" and k:sub(1, 2) ~= "__" then
+            self[k] = v
+        end
+    end
 end
 
 local function class_sort(class)
@@ -55,7 +54,7 @@ end
 
 ---@param base core.object?
 ---@param define core.object?
----@param sort boolean? If true, will re-arrange class functions to be compatible with luastg's internals.
+---@param sort boolean? If true, will re-arrange class functions to be compatible with luastg's internals. Usually not needed.
 ---@return core.object
 function M.define(base, define, sort)
     base = base or object
@@ -77,6 +76,16 @@ end
 function M.init_all()
     for _, v in pairs(all_classes) do
         class_sort(v)
+        local class = v
+        local base_init = v[1]
+        v[1] = function(self, ...)
+            for k, fn in pairs(class) do
+                if type(k) == "string" and type(fn) == "function" and k:sub(1, 2) ~= "__" then
+                    rawset(self, k, fn)
+                end
+            end
+            return base_init(self, ...)
+        end
     end
     all_classes = {}
 end

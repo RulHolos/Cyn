@@ -1,5 +1,7 @@
 local steam_exists, steam = pcall(require, "steam")
+---@diagnostic disable-next-line: undefined-field
 local keyboard = lstg.Input.Keyboard
+---@diagnostic disable-next-line: undefined-field
 local mouse = lstg.Input.Mouse
 
 --Just making sure steam api is accessible. Cuz "steam" require always is true for some reason. Just a double check.
@@ -15,79 +17,62 @@ local M = {}
 M.__index = M
 core.input = M
 
----@type table<string, table<string, boolean>>
+---@type table<string, boolean>
 local keyState = {}
----@type table<string, table<string, boolean>>
+---@type table<string, boolean>
 local keyStatePrev = {}
----@type table<string, table<string, integer>>
+---@type table<string, integer>
 local keyDirectionTimer = {}
 
 local DIRECTION_KEYS = { "Up", "Down", "Left", "Right" }
 
 ---Performs the input state update. Should be called once per frame.
 function M:refresh()
-    for player, bindings in pairs(core.userdata.settings.keys) do
-        if not keyState[player] then
-            keyState[player] = {}
-            keyStatePrev[player] = {}
-            keyDirectionTimer[player] = {}
-            for _, dir in ipairs(DIRECTION_KEYS) do
-                keyDirectionTimer[player][dir] = 0
-            end
+    for action, keycode in pairs(core.userdata.settings.keys) do
+        local is_down = keyboard.GetKeyState(keycode)
+        keyStatePrev[action] = keyState[action] or false
+        keyState[action] = is_down
+
+        if keyStatePrev[action] ~= is_down then
+            core.signals:Emit("KeyStateChanged", action, is_down)
         end
+    end
 
-        for action, keycode in pairs(bindings) do
-            local is_down = keyboard.GetKeyState(keycode)
-            keyStatePrev[player][action] = keyState[player][action] or false
-            keyState[player][action] = is_down
-
-            if keyStatePrev[player][action] ~= is_down then
-                core.signals:Emit("KeyStateChanged", player, action, is_down)
-            end
-        end
-
-        for dir, _ in pairs(keyDirectionTimer[player]) do
-            if keyState[player][dir] then
-                keyDirectionTimer[player][dir] = keyDirectionTimer[player][dir] + 1
-            else
-                keyDirectionTimer[player][dir] = 0
-            end
+    for _, dir in ipairs(DIRECTION_KEYS) do
+        if keyState[dir] then
+            keyDirectionTimer[dir] = (keyDirectionTimer[dir] or 0) + 1
+        else
+            keyDirectionTimer[dir] = 0
         end
     end
 end
 
 ---Returns `true` while the key is pressed down.
----@param player string e.g. "p1"
 ---@param action string e.g. "Shoot"
 ---@return boolean is_down
-function M:is_down(player, action)
-    return keyState[player] and keyState[player][action] or false
+function M:is_down(action)
+    return keyState[action] or false
 end
 
 ---Returns true only on the first frame the key is pressed.
----@param player string e.g. "p1"
 ---@param action string e.g. "Shoot"
 ---@return boolean is_pressed
-function M:is_pressed(player, action)
-    if not keyState[player] then return false end
-    return keyState[player][action] and not keyStatePrev[player][action]
+function M:is_pressed(action)
+    return keyState[action] and not keyStatePrev[action] or false
 end
 
 ---Returns true only on the first frame the key is released.
----@param player string e.g. "p1"
 ---@param action string e.g. "Shoot"
 ---@return boolean is_released
-function M:is_released(player, action)
-    if not keyState[player] then return false end
-    return keyStatePrev[player][action] and not keyState[player][action]
+function M:is_released(action)
+    return keyStatePrev[action] and not keyState[action] or false
 end
 
 ---Returns how many consecutive frames the direction key has been held.
----@param player string e.g. "p1"
 ---@param dir "Up"|"Down"|"Left"|"Right"
 ---@return integer
-function M:get_direction_timer(player, dir)
-    return keyDirectionTimer[player] and keyDirectionTimer[player][dir] or 0
+function M:get_direction_timer(dir)
+    return keyDirectionTimer[dir] or 0
 end
 
 ---Converts a key action to a readable key name (e.g "Z" for Shoot).

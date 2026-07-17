@@ -80,9 +80,13 @@ end
 ---@class core.ui_manager
 ---@field _widgets core.ui.widget[]
 ---@field _by_name table<string, core.ui.widget>
+---@field _defs table<string, table>
+---@field _def_order string[]
 local M = {
     _widgets = {},
     _by_name = {},
+    _defs = {},
+    _def_order = {},
 }
 core.ui_manager = M
 ---@return core.ui.widget
@@ -90,22 +94,10 @@ function M.widget()
     return new_widget("", nil)
 end
 
----Creates and registers a new widget. `init` is called automatically after creation.
----
----```lua
----local w = core.ui_manager:new_widget("boss_bar", {
----    x = 320, y = 16, order = 20,
----    data = { value = 1.0 },
----    render = function(self)
----        -- draw boss HP bar using self.data.value
----    end,
----})
----```
----@param name string Unique name for the widget.
----@param overrides table? Optional fields to override (x, y, rot, scale_h, scale_v, order, visible, active, data, init, frame, render).
+---@param name string
+---@param overrides table?
 ---@return core.ui.widget
-function M:new_widget(name, overrides)
-    assert(type(name) == "string" and name ~= "", "UI Manager: widget name must be a non-empty string.")
+function M:_instantiate_widget(name, overrides)
     assert(not self._by_name[name], ("UI Manager: a widget named '%s' already exists."):format(name))
 
     local w = new_widget(name, overrides)
@@ -113,6 +105,27 @@ function M:new_widget(name, overrides)
     self._by_name[name] = w
     if w.init then w:init() end
     return w
+end
+
+---Registers a widget definition. Fresh widget instances are created on every stage start.
+---@param name string Unique name for the widget.
+---@param overrides table? Optional fields to override (x, y, rot, scale_h, scale_v, order, visible, active, data, init, frame, render).
+function M:register_widget(name, overrides)
+    assert(type(name) == "string" and name ~= "", "UI Manager: widget name must be a non-empty string.")
+    assert(not self._defs[name], ("UI Manager: a widget definition named '%s' already exists."):format(name))
+
+    self._defs[name] = overrides
+    table.insert(self._def_order, name)
+end
+
+---Creates and registers a new widget instance immediately.
+---Use `register_widget` for stage-scoped widgets.
+---@param name string Unique name for the widget.
+---@param overrides table? Optional fields to override (x, y, rot, scale_h, scale_v, order, visible, active, data, init, frame, render).
+---@return core.ui.widget
+function M:new_widget(name, overrides)
+    assert(type(name) == "string" and name ~= "", "UI Manager: widget name must be a non-empty string.")
+    return self:_instantiate_widget(name, overrides)
 end
 
 ---Removes a widget by name or by reference.
@@ -166,6 +179,14 @@ function M:clear()
     self._by_name = {}
 end
 
+---Creates all registered widget instances for the current stage.
+function M:spawn_registered_widgets()
+    for i = 1, #self._def_order do
+        local name = self._def_order[i]
+        self:_instantiate_widget(name, self._defs[name])
+    end
+end
+
 ---Calls `frame` on every active widget, in render order.
 function M:frame()
     local list = self._widgets
@@ -192,9 +213,19 @@ end
 
 core.signals:Register("ui_manager:frame", "Frame", function() M:frame() end, 998)
 core.signals:Register("ui_manager:render", "Render", function() M:render() end, 998)
+core.signals:Register("ui_manager:stage_start", "stage:start", function()
+    M:clear()
+    M:spawn_registered_widgets()
+end)
+core.signals:Register("ui_manager:stage_end", "stage:end", function()
+    M:clear()
+end)
 
 ------------------------------------------------------------
 --- Load widgets
 
 local patch = "core.lib.ui.widgets."
 require(patch .. "ui_bg")
+require(patch .. "score")
+require(patch .. "fps")
+require(patch .. "diff")

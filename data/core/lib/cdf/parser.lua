@@ -47,7 +47,9 @@ end
 --#endregion
 --#region Reference resolution
 
-local function resolve_refs(str, stack, id_map)
+local resolve_namespace_ref
+
+local function resolve_refs(str, stack, id_map, namespaces, namespace_overrides)
     --{#id.key}, lookup by id anywhere in the file
     str = str:gsub("{#([%w_]+)%.([%w_]+)}", function(id, key)
         local target = id_map[id]
@@ -74,6 +76,15 @@ local function resolve_refs(str, stack, id_map)
             return string.format("{unresolved:%s}", key)
         end
         return tostring(current[key])
+    end)
+
+    --{Alias.Type.key}, lookup field on namespace
+    str = str:gsub("{([%w_]+)%.([%w_]+)%.([%w_]+)}", function(alias, ty, key)
+        local target = resolve_namespace_ref(alias .. "." .. ty, namespaces, namespace_overrides)
+        if not target or target[key] == nil then
+            return string.format("{unresolved:%s.%s.%s}", alias, ty, key)
+        end
+        return tostring(target[key])
     end)
 
     return str
@@ -157,7 +168,7 @@ local function parse_block_header(text)
     return { type = block_type, name = block_name, extends_ref = extends_ref }
 end
 
-local function resolve_namespace_ref(ref, namespaces, namespace_overrides)
+function resolve_namespace_ref(ref, namespaces, namespace_overrides)
     local alias, name = ref:match("^([%w_]+)%.([%w_]+)$")
     if not alias then return nil end
 
@@ -177,13 +188,13 @@ local function resolve_extends_target(ref, id_map, namespaces, namespace_overrid
     return resolve_namespace_ref(ref, namespaces, namespace_overrides)
 end
 
-local function resolve_tree(node, stack, id_map)
+local function resolve_tree(node, stack, id_map, namespaces, namespace_overrides)
     table.insert(stack, node)
 
     for k, v in pairs(node) do
         if type(k) == "string" and k:sub(1, 1) ~= "_" then
             if type(v) == "string" then
-                node[k] = resolve_refs(v, stack, id_map)
+                node[k] = resolve_refs(v, stack, id_map, namespaces, namespace_overrides)
             elseif type(v) == "table" and v.__unresolved_ref then
                 local target = id_map[v.__unresolved_ref.id]
                 local refkey = v.__unresolved_ref.key
@@ -192,16 +203,24 @@ local function resolve_tree(node, stack, id_map)
                 else
                     node[k] = string.format("{unresolved:#%s.%s}", v.__unresolved_ref.id, refkey)
                 end
+            elseif type(v) == "table" and v.__unresolved_ns_ref then
+                local ref = v.__unresolved_ns_ref
+                local target = resolve_namespace_ref(ref.alias .. "." .. ref.type, namespaces, namespace_overrides)
+                if target and target[ref.key] ~= nil then
+                    node[k] = target[ref.key]
+                else
+                    node[k] = string.format("{unresolved:%s.%s.%s}", ref.alias, ref.type, ref.key)
+                end
             elseif type(v) == "table" and v.__lua_expr then
                 --Raw Lua source
             elseif type(v) == "table" and v._type then
                 --Nested block stored as a property value
-                resolve_tree(v, stack, id_map)
+                resolve_tree(v, stack, id_map, namespaces, namespace_overrides)
             elseif type(v) == "table" then
                 --Plain array from parse_array
                 for idx, item in ipairs(v) do
                     if type(item) == "string" then
-                        v[idx] = resolve_refs(item, stack, id_map)
+                        v[idx] = resolve_refs(item, stack, id_map, namespaces, namespace_overrides)
                     end
                 end
             end
@@ -210,7 +229,7 @@ local function resolve_tree(node, stack, id_map)
 
     for _, child in ipairs(node) do
         if type(child) == "table" then
-            resolve_tree(child, stack, id_map)
+            resolve_tree(child, stack, id_map, namespaces, namespace_overrides)
         end
     end
 
@@ -406,13 +425,13 @@ function parser.parse_string(content, current_path, import_cache)
                 local key, value = line:match("^([%a_][%w_.]*)%s*:%s*(.*)$")
                 if key then
                     local id_ref_target, id_ref_key = value:match("^#([%w_]+)%.([%w_]+)$")
-
+                    local ns_ref_alias, ns_ref_type, ns_ref_key = value:match("^([%w_]+)%.([%w_]+)%.([%w_]+)$")
                     if id_ref_target then
                         current[key] = { __unresolved_ref = { id = id_ref_target, key = id_ref_key } }
-
+                    elseif ns_ref_alias then
+                        current[key] = { __unresolved_ns_ref = { alias = ns_ref_alias, type = ns_ref_type, key = ns_ref_key } }
                     elseif value:match("^%s*%[.*%]%s*$") then
                         current[key] = parse_array(value)
-
                     elseif value:match("^%s*\"\"\"") then
                         local multiline = {}
                         i = i + 1
@@ -441,7 +460,7 @@ function parser.parse_string(content, current_path, import_cache)
         error(string.format("[CDF] Closed file before finishing the '%s' block.", deepest_block))
     end
 
-    resolve_tree(root, {}, id_map)
+    resolve_tree(root, {}, id_map, namespaces, namespace_overrides)
 
     return root
 end

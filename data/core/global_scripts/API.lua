@@ -48,6 +48,7 @@
 ---@field g number green component
 ---@field b number blue component
 ---@field ARGB fun(self:lstg.Color) : number, number, number, number Returns a, r, g, b components respectively
+---@field AHSV fun(self:lstg.Color) : number, number, number, number Returns a, h, s, v components respectively
 ---@operator add(lstg.Color) : lstg.Color Adds two colors and returns the result.
 ---@operator sub(lstg.Color) : lstg.Color Substracts two colors and returns the result.
 ---@operator mul(lstg.Color) : lstg.Color Multiplies two colors together and returns the result.
@@ -91,7 +92,7 @@
 ---@field FileExist fun(path:string, all:boolean?) : boolean Returns `true` if the file exists at `path` .
 ---@field FindFiles fun(search_path:string, extension:string?) Same as `EnumFiles` but for archives.
 ---@field AddSearchPath fun(path:string) Adds a path to allow the engine to search source files in.
----@field RemoveSearchPath fun(path:string) Removes a path to allow the engine to search source files in.
+---@field RemoveSearchPath fun(path:string) Removes a path from the engine's search paths.
 ---@field ClearSearchPath fun() Removes all the search paths stored in the engine. Not recommended.
 ---@field SetCurrentDirectory fun(path:string) Sets the current working directory. Crashes if the directory doesn't exist.
 ---@field GetCurrentDirectory fun() : string Returns the current working directory.
@@ -162,6 +163,7 @@
 ---Resource Loaders
 ---@field CreateRenderTarget fun(name:string, width:number?, height:number?) Creates a render target. Will be treated as a texture resource.
 ---@field LoadTexture fun(name:string, path:string, mipmap:boolean?) Loads a texture resource from a file.
+---@field LoadTextureBin fun(name:string, bin:string, mipmap:boolean?) Loads a texture resource from binary data.
 ---@field LoadImage fun(name:string, tex_name:string, x:number, y:number, width:number, height:number, a:number?, b:number?, rect:boolean?) Loads an image from a texture with optional collision parameters.
 ---@field LoadAnimation fun(name:string, tex_name:string, x:number, y:number, width:number, height:number, columns:integer, rows:integer, interval:integer, a:number?, b:number?, rect:boolean?) Loads an animation from a texture with optional collision parameters.
 ---@field LoadPS fun(name:string, def_file:string, img_name:string, a:number?, b:number?, rect:boolean?) Loads a HGE particle from a file with optional collision parameters.

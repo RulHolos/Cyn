@@ -22,7 +22,7 @@ function i18n.load_file(relative_path)
 end
 
 ---@param relative_path string The relative path to the i18n file (without language prefix nor extension)
----@param block_id string|integer|table The block's name (from `Type:name`, a positional index, or an index path
+---@param block_id string|integer|table The block's name (from `Type:name`, a positional index, or an index path)
 ---@param key string The key of the property inside the block
 ---@param ... any Arguments to format the string if it contains placeholders
 ---@return string @The localized formatted string.

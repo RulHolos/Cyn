@@ -35,14 +35,6 @@ table.insert(all_classes, object)
 
 M.base = object
 
-local function equivalent(self, target)
-    for k, v in pairs(target) do
-        if type(k) ~= "number" and k ~= "is_class" and k ~= "base" and k:sub(1, 2) ~= "__" then
-            self[k] = v
-        end
-    end
-end
-
 local function class_sort(class)
     class[1] = class.init
     class[2] = class.del
@@ -59,12 +51,15 @@ end
 function M.define(base, define, sort)
     base = base or object
     local result = { noop, noop, noop, DefaultRenderFunc, noop, noop, is_class = true, base = base }
-    equivalent(result, base)
+
+    setmetatable(result, { __index = base })
+
     if type(define) == "table" then
         for k, v in pairs(define) do
             result[k] = v
         end
     end
+
     if sort then
         class_sort(result)
     else
@@ -76,16 +71,6 @@ end
 function M.init_all()
     for _, v in pairs(all_classes) do
         class_sort(v)
-        local class = v
-        local base_init = v[1]
-        v[1] = function(self, ...)
-            for k, fn in pairs(class) do
-                if type(k) == "string" and type(fn) == "function" and k:sub(1, 2) ~= "__" then
-                    rawset(self, k, fn)
-                end
-            end
-            return base_init(self, ...)
-        end
     end
     all_classes = {}
 end

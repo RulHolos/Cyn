@@ -17,7 +17,6 @@ end
 
 function w:render()
     core.view:set("ui")
-    local wo = core.screen.world
 
     if self.fps then
         self.fps:render(core.screen.width - 2, 2)

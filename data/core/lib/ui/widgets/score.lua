@@ -42,8 +42,6 @@ function w:init()
     set_common_text(self.score_value, 255, 255, 255)
     self.score_value:setAlignment("right", "top")
 
-    core.userdata.add_score(500, false) --For testing
-
     --Populate text on first frame forced.
     self:frame()
 end

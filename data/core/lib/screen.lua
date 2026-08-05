@@ -401,13 +401,11 @@ function core.view:set(mode)
     if mode == "world" then
         local l, r, b, t = core.world_camera:getTransformedBounds()
         lstg.SetOrtho(l, r, b, t)
-        lstg.SetEffekseerView2D((l + r) * 0.5, (b + t) * 0.5, r - l, t - b)
         viewport(w.scrl, w.scrr, w.scrb, w.scrt)
         lstg.SetFog()
         lstg.SetImageScale(1)
     elseif mode == "ui" then
         lstg.SetOrtho(0, sc.width, 0, sc.height)
-        lstg.SetEffekseerView2D(sc.halfW, sc.halfH, sc.width, sc.height)
         viewport(0, sc.width, 0, sc.height)
         lstg.SetFog()
         lstg.SetImageScale(1)

@@ -83,7 +83,7 @@ function M:render()
     local blend = self.blend or ""
     local a, r, g, b = self.a or 255, self.r or 255, self.g or 255, self.b or 255
 
-    local color = self.player.protect % 3 == 1 and Color(a, 0, 0, b) or Color(a, r, g, b)
+    local color = self.player.protect % 3 == 1 and lstg.Color(a, 0, 0, b) or lstg.Color(a, r, g, b)
     lstg.SetImageState(self.img.name, blend, color)
     lstg.Render(self.img.name, self.player.x, self.player.y, self.player.rot)
 end

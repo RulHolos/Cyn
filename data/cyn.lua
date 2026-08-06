@@ -1,7 +1,6 @@
 ---@type lstg
 lstg = lstg or {}
 
-require("core.global_scripts.API")
 require("core.global_scripts.std")
 require("resources") -- Resource wrappers.
 require("core") -- Core of the library

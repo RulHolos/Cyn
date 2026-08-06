@@ -229,6 +229,14 @@ math.SQRT3 = math.sqrt(3)
 math.SQRT2_2 = math.sqrt(0.5)
 math.GOLD = 360 * (math.sqrt(5) - 1) / 2
 
+sin = lstg.sin
+cos = lstg.cos
+tan = lstg.tan
+asin = lstg.asin
+acos = lstg.acos
+atan = lstg.atan
+atan2 = lstg.atan2
+
 if not math.mod then
 	math.mod = function(a, b)
 		return a % b

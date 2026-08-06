@@ -86,6 +86,7 @@ local old_remove_res = lstg.RemoveResource
 ---@param pool string
 ---@param restype ResourceTypes
 ---@param resname string
+---@diagnostic disable-next-line: duplicate-set-field
 function lstg.RemoveResource(pool, restype, resname)
     local t = ENUM_RES_TYPE[restype]
     if t == nil then
@@ -112,7 +113,7 @@ end
 ---@overload fun(from:string, resource:ResourceTypesClasses, to:string)
 function resources.Transfer(from, t, name, to)
     if not lstg.TransferResource then
-        Log(2, "lstg.TransferResource is not available in your engine version or branch. Make sure you're using LuaSTG-Flux 0.2.4 or higher.")
+        lstg.Log(2, "lstg.TransferResource is not available in your engine version or branch. Make sure you're using LuaSTG-Flux 0.2.4 or higher.")
         return
     end
 

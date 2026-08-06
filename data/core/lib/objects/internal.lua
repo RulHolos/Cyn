@@ -20,7 +20,7 @@ end
 ---@param self core.object
 ---@param obj core.object
 function M.new_slave(self, obj)
-    obj = New(obj)
+    obj = lstg.New(obj)
     self._slaves = self._slaves or {}
     table.insert(self._slaves, obj)
     return obj

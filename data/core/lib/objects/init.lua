@@ -50,7 +50,7 @@ end
 ---@return core.object
 function M.define(base, define, sort)
     base = base or object
-    local result = { noop, noop, noop, DefaultRenderFunc, noop, noop, is_class = true, base = base }
+    local result = { noop, noop, noop, lstg.DefaultRenderFunc, noop, noop, is_class = true, base = base }
 
     setmetatable(result, { __index = base })
 

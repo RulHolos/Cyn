@@ -48,7 +48,8 @@
                 "path": "i18n/"
             }
         ],
-        "user": "userdata/"
+        "user": "userdata/",
+        "entry_point": "cyn.lua"
     },
     "timing": {
         "frame_rate": 60

@@ -7,16 +7,16 @@
 ------------------------------------------------------------
 --- Stage
 
----@class stage
+---@class core.stage
 ---@field type StageType
 ---@field name string
 ---@field is_menu boolean
 ---@field is_entry boolean
 ---@field timer integer
----@field init fun(self:stage)
----@field frame fun(self:stage)
----@field render fun(self:stage)
----@field del fun(self:stage)
+---@field init fun(self:core.stage)
+---@field frame fun(self:core.stage)
+---@field render fun(self:core.stage)
+---@field del fun(self:core.stage)
 local _s = {
     type = "stage",
     name = "",
@@ -31,7 +31,7 @@ local _s = {
 
 ---@param name string
 ---@param overrides table?
----@return stage
+---@return core.stage
 local function new_stage_object(name, overrides)
     local s = {}
     for k, v in pairs(_s) do
@@ -49,7 +49,7 @@ end
 ------------------------------------------------------------
 --- Stage Group
 
----@class stage_group
+---@class core.stage_group
 ---@field type StageType
 ---@field name string
 ---@field stages string[] Ordered list of fully-qualified stage names.
@@ -65,8 +65,8 @@ local stage_group = {
 
 ---Registers a stage inside this group.
 ---Stage name qualified as 'name@group_name'.
----@param stage stage
----@return stage @self
+---@param stage core.stage
+---@return core.stage @self
 ---@private
 function stage_group:register_stage(stage)
     stage.name = ("%s@%s"):format(stage.name, self.name)
@@ -75,9 +75,18 @@ function stage_group:register_stage(stage)
 end
 
 function stage_group:new_stage(name)
-    local stage = new_stage_object(name)
-    self:register_stage(stage)
-    core.stage_manager.stages[stage.name] = stage
+    local qualified_name = ("%s@%s"):format(name, self.name)
+    local stage = core.stage_manager.stages[qualified_name]
+    if stage then
+        for k in pairs(stage) do stage[k] = nil end
+        for k, v in pairs(_s) do stage[k] = v end
+        stage.name = qualified_name
+    else
+        stage = new_stage_object(name)
+        self:register_stage(stage)
+        core.stage_manager.stages[stage.name] = stage
+    end
+    table.insert(self.stages, stage.name)
     return stage
 end
 
@@ -97,13 +106,13 @@ function stage_group:advance()
 end
 
 ---@class core.stage_manager
----@field stages table<string, stage>
----@field groups table<string, stage_group>
----@field current_stage stage?
----@field current_group stage_group?
----@field next stage|stage_group|nil
----@field menu_name stage?
----@field entry_name stage?
+---@field stages table<string, core.stage>
+---@field groups table<string, core.stage_group>
+---@field current_stage core.stage?
+---@field current_group core.stage_group?
+---@field next core.stage|core.stage_group|nil
+---@field menu_name core.stage?
+---@field entry_name core.stage?
 local M = {
     stages = {},
     groups = {},
@@ -127,18 +136,24 @@ function M:new_stage(name, opts)
     opts = opts or {}
     assert(type(name) == "string" and name ~= "", "Stage name must be a non-empty string.")
 
-    if self.stages[name] then
-        error(("StageManager: a stage named '%s' already exists."):format(name))
+    local stage = self.stages[name]
+    if stage then
+        for k in pairs(stage) do
+            stage[k] = nil
+        end
+        for k, v in pairs(_s) do
+            stage[k] = v
+        end
+        stage.name = name
+    else
+        stage = new_stage_object(name)
+        self.stages[name] = stage
     end
 
-    local stage = new_stage_object(name, {
-        is_menu = opts.menu or false,
-        is_entry = opts.entry_point or false,
-    })
+    stage.is_menu = opts.menu or false
+    stage.is_entry = opts.entry_point or false
 
-    self.stages[name] = stage
-
-    if stage.is_entry then
+    if stage.is_entry and self.entry_name ~= name then
         if self.entry_name then
             error(("StageManager: entry point already set to '%s'."):format(self.entry_name))
         end
@@ -146,7 +161,7 @@ function M:new_stage(name, opts)
         self.next = stage -- queued automatically.
     end
 
-    if stage.is_menu then
+    if stage.is_menu and self.menu_name ~= name then
         if self.menu_name then
             error(("StageManager: menu already set to '%s'."):format(self.menu_name))
         end
@@ -165,7 +180,7 @@ end
 ---```
 ---@param name string
 ---@param opts {after: string?}? `after`: name of the stage/group to go when this group ends.
----@return stage_group
+---@return core.stage_group
 function M:new_group(name, opts)
     opts = opts or {}
     assert(type(name) == "string" and name ~= "", "Stage group name must be a non-empty string.")
@@ -252,17 +267,17 @@ function M:switch()
     self:load_target(target)
 end
 
----@param target stage|stage_group|nil
+---@param target core.stage|core.stage_group|nil
 ---@private
 function M:load_target(target)
     assert(target ~= nil, "StageManager: target cannot be nil.")
 
     if target.type == "stage" then
         self.current_group = nil
-        ---@cast target stage
+        ---@cast target core.stage
         self:load_stage(target)
     elseif target.type == "group" then
-        ---@cast target stage_group
+        ---@cast target core.stage_group
         self.current_group = target
         local first_name = target:advance()
         if not first_name then
@@ -292,7 +307,7 @@ function M:stop_current()
     self.current_stage = nil
 end
 
----@param stage stage
+---@param stage core.stage
 ---@private
 function M:load_stage(stage)
     assert(stage ~= nil, "StageManager: stage cannot be nil.")

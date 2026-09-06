@@ -30,10 +30,10 @@ function M.from_texture(tex)
 
     if type(tex) == "string" then
         name = tex
-    elseif type(tex) == "table" and getmetatable(tex) == resources.texture then
+    elseif type(tex) == "table" and (getmetatable(tex) == resources.texture or getmetatable(tex) == resources.render_target) then
         name = tex.name
     else
-        error("Invalid texture argument for atlas creation: must be a texture name or resource.texture instance.")
+        error("Invalid texture argument for atlas creation: must be a texture name or resource.texture or resource.render_target instance.")
     end
 
     atlas.name = name
@@ -42,10 +42,10 @@ end
 
 function M:destroy()
     for _, img in pairs(self.parts) do
-        lstg.RemoveResource(lstg.GetResourceStatus(), "img", img.name)
+        lstg.RemoveResource(img._pool, "img", img.name)
     end
     self.parts = {}
-    lstg.RemoveResource(lstg.GetResourceStatus(), "tex", self.name)
+    lstg.RemoveResource(self._pool, "tex", self.name)
 end
 
 function M:get_parts_count()

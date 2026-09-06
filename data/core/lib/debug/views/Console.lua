@@ -12,6 +12,8 @@ local oldLog = lstg.Log
 local logs = {}
 local levels = {'[D] ', '[I] ', '[W] ', '[E] ', '[F] '}
 
+---@param level core.global.LOG
+---@param text string
 function lstg.Log(level, text)
     oldLog(level, text)
 
@@ -25,7 +27,7 @@ function print(...)
     for i = 2, select("#", ...) do
         s = s .. '\t' .. tostring(select(i, ...))
     end
-    log(2, s)
+    log(LOG.INFO, s)
 end
 
 lstg.Print = print
@@ -37,7 +39,7 @@ local function xpcall_handler(err)
     return debug.traceback(err)
 end
 
----@class lstg.debug.Console : lstg.debug.view
+---@class lstg.debug.view.Console : lstg.debug.view
 local Console = {}
 
 function Console:getWindowName() return "Console" end

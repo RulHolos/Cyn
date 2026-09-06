@@ -15,10 +15,10 @@ function w:init()
     self.font = resources.ttf.from_file("assets/fonts/score2.ttf", 16)
 
     self.fps = lstg.RichText.createFromPool(self.font.name, 16)
-    self.fps:setAlignment("center", "top")
-    self.fps:setFillColor(lstg.Color(255, 200, 200, 200))
-    self.fps:setOutline(3, lstg.Color(255, 0, 0, 0))
-    self.fps:setText(get_stage_label())
+        :setAlignment("center", "top")
+        :setFillColor(lstg.Color(255, 200, 200, 200))
+        :setOutline(3, lstg.Color(255, 0, 0, 0))
+        :setText(get_stage_label())
 
     local wo = core.screen.world
     self.x1 = -192 + wo.scrr

@@ -102,6 +102,12 @@ function TweenInstance:label(name)
     return self
 end
 
+---Stops this specific tween immediately without onComplete callback execution.
+function TweenInstance:stop()
+    self.finished = true
+    self.active = false
+end
+
 ---@private
 function TweenInstance:update()
     if self.finished or not self.active then return end
@@ -124,12 +130,14 @@ function TweenInstance:update()
     if progress >= 1.0 then
         self._completedCount = self._completedCount + 1
 
-        if self._yoyo and (self._completedCount % 2 ~= 0) then
-            local oldFrom = self.from
-            self.from = self.properties
-            self.properties = oldFrom
-            self.timer = 0
-        elseif self._repeatCount == -1 or self._completedCount <= self._repeatCount then
+        local canRepeat = (self._repeatCount == -1) or (self._completedCount <= self._repeatCount)
+
+        if canRepeat then
+            if self._yoyo then
+                local oldFrom = self.from
+                self.from = self.properties
+                self.properties = oldFrom
+            end
             self.timer = 0
         else
             self.finished = true
@@ -143,16 +151,56 @@ end
 ---@param frames number The duration of the tween in frames
 ---@return core.tween.instance
 function M.New(target, props, frames)
-    local instance = TweenInstance.new(target, props, frames)
-
     local list = rawget(target, TWEEN_FIELD)
     if not list then
         list = {}
         rawset(target, TWEEN_FIELD, list)
     end
+
+    for i = #list, 1, -1 do
+        local existing = list[i]
+        if existing.active and not existing.finished then
+            for key, _ in pairs(props) do
+                if existing.properties[key] ~= nil then
+                    existing.properties[key] = nil
+                    existing.from[key] = nil
+                end
+            end
+
+            if next(existing.properties) == nil then
+                existing:stop()
+                table.remove(list, i)
+            end
+        end
+    end
+
+    local instance = TweenInstance.new(target, props, frames)
     table.insert(list, instance)
 
     return instance
+end
+
+---Stops all tweens for a target, or only tweens animating a specific property.
+---@param target table
+---@param property string? Optional property name to target
+function M.Stop(target, property)
+    local list = rawget(target, TWEEN_FIELD)
+    if not list then return end
+
+    for i = #list, 1, -1 do
+        local existing = list[i]
+        if property then
+            existing.properties[property] = nil
+            existing.from[property] = nil
+            if next(existing.properties) == nil then
+                existing:stop()
+                table.remove(list, i)
+            end
+        else
+            existing:stop()
+            table.remove(list, i)
+        end
+    end
 end
 
 function M.Do(target)
@@ -168,20 +216,6 @@ function M.Do(target)
             table.remove(list, i)
         end
     end
-end
-
----Convenience generator for a fade-in tween on an object's `_a` property.
----@param time number Duration of the fade in effect in frames.
----@return core.tween.instance
-function M.FadeIn(target, time)
-    return M.New(target, { _a = 255 }, time)
-end
-
----Convenience generator for a fade-out tween on an object's `_a` property.
----@param time number Duration of the fade out effect in frames.
----@return core.tween.instance
-function M.FadeOut(target, time)
-    return M.New(target, { _a = 0 }, time)
 end
 
 return M

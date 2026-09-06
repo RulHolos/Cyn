@@ -123,7 +123,7 @@ function M.from_image(img, ml, mr, mt, mb, repeat_edges)
 end
 
 function M:destroy()
-    local pool = lstg.GetResourceStatus()
+    local pool = self._pool
     for _, piece in ipairs({
         self._tl, self._tc, self._tr,
         self._ml, self._mc, self._mr,

@@ -37,7 +37,7 @@ function audio_manager.load_se()
             res:set_volume(v)
             audio_manager.sounds[k] = res
         else
-            print(0, "Failed to load sound effect " .. k .. " from " .. full_path)
+            lstg.Log(LOG.ERROR, "Failed to load sound effect " .. k .. " from " .. full_path)
         end
     end
 end
@@ -51,7 +51,7 @@ function audio_manager.play_se(name, volume, pan)
     if sound then
         sound:play(volume, pan)
     else
-        print("Sound effect " .. name .. " not found.")
+        lstg.Log(LOG.ERROR, "Sound effect " .. name .. " not found.")
     end
 end
 

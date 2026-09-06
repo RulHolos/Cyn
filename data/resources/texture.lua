@@ -1,5 +1,6 @@
 ---@class resource.texture
 ---@field name string Internal name of the texture. Can be used to reference this texture in other resources.
+---@field _pool string Resource pool containing this texture.
 local M = {
     name = "",
     type = "tex",
@@ -31,7 +32,7 @@ function M:save_to_file(path)
 end
 
 function M:destroy()
-    lstg.RemoveResource(lstg.GetResourceStatus(), "tex", self.name)
+    lstg.RemoveResource(self._pool, "tex", self.name)
 end
 
 ---Gets the size of this texture.

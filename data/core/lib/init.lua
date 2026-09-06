@@ -13,6 +13,7 @@
 ---@field player core.player
 ---@field background core.background
 ---@field stage_manager core.stage_manager
+---@field cdf core.cdf
 local M = {}
 core = M
 core.__index = M
@@ -78,10 +79,15 @@ require("core.lib.scene_manager")
 require("core.lib.random")
 require("core.lib.ui")
 require("core.lib.input")
+require("core.lib.menu")
 
 require("core.lib.misc")
 require("core.lib.item")
 require("core.lib.player")
 require("core.lib.background")
+
+require("core.lib.hot_reload")
+
+require("core.lib.plugins")
 
 require("core.lib.mainloop")

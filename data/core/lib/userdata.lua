@@ -1,5 +1,5 @@
 ---@class core.userdata
----@field settings settings
+---@field settings core.settings
 local M = {}
 core.userdata = M
 ---@type table<string, any> Table for abritrary game state variables. Like score or player power. Will be kept between stages. Will reset with new stage groups.

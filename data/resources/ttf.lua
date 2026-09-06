@@ -20,7 +20,7 @@ function M.from_file(path, size)
 end
 
 function M:destroy()
-    lstg.RemoveResource(lstg.GetResourceStatus(), "ttf", self.name)
+    lstg.RemoveResource(self._pool, "ttf", self.name)
 end
 
 ---@return boolean Validity

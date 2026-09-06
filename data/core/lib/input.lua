@@ -1,7 +1,5 @@
 local steam_exists, steam = pcall(require, "steam")
----@diagnostic disable-next-line: undefined-field
 local keyboard = lstg.Input.Keyboard
----@diagnostic disable-next-line: undefined-field
 local mouse = lstg.Input.Mouse
 
 --Just making sure steam api is accessible. Cuz "steam" require always is true for some reason. Just a double check.

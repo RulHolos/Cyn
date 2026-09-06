@@ -1,9 +1,13 @@
+---Context node: I'm fully aware that Flux exposes actual "modern" way of using SOME resources types (textures, images, ...)
+---But, for the sake of simplicity and continuity, I chose to stick with the legacy methods.
+
 ---@class resources
 resources = {}
 
 ---@class resource_base
 ---@field name string Internal name of the resource.
 ---@field type ResourceTypes
+---@field _pool string Resource pool containing this resource.
 ---@field from_file function Loads the resource from a file. Arguments depend on the resource type.
 ---@field destroy fun() Cleanup to free the resource from the memory and pool.
 ---@field is_valid fun() : boolean Checks if the resource is usable.
@@ -16,6 +20,7 @@ function makeInstance(class_type)
     class_type.__index = class_type
     local instance = {}
     setmetatable(instance, class_type)
+    instance._pool = lstg.GetResourceStatus()
     return instance
 end
 
@@ -59,6 +64,7 @@ ENUM_RES_TYPE = { tex = 1, img = 2, ani = 3, bgm = 4, snd = 5, psi = 6, fnt = 7,
 
 ---@alias ResourceTypesClasses
 ---| resource.texture
+---| resource.render_target
 ---| resource.image
 ---| resource.music
 
@@ -91,8 +97,11 @@ function lstg.RemoveResource(pool, restype, resname)
     local t = ENUM_RES_TYPE[restype]
     if t == nil then
         error("Invalid resource type: " .. tostring(restype))
-    else
-        old_remove_res(pool, t, resname)
+    end
+
+    local actual_pool = lstg.CheckRes(t, resname)
+    if actual_pool then
+        old_remove_res(actual_pool, t, resname)
     end
 end
 
@@ -101,7 +110,7 @@ end
 ---Sets the active resource pool. Non-existing pools with `pool_name` will be created.
 ---@param pool_name string
 function resources.SetActivePool(pool_name)
-    lstg.CreateResourcePool(pool_name) -- Skips automatically if it exists
+    lstg.CreateResourcePool(pool_name) --Skips automatically if it exists
     lstg.SetResourceStatus(pool_name)
 end
 
@@ -113,13 +122,13 @@ end
 ---@overload fun(from:string, resource:ResourceTypesClasses, to:string)
 function resources.Transfer(from, t, name, to)
     if not lstg.TransferResource then
-        lstg.Log(2, "lstg.TransferResource is not available in your engine version or branch. Make sure you're using LuaSTG-Flux 0.2.4 or higher.")
+        lstg.Log(LOG.INFO, "lstg.TransferResource is not available in your engine version or branch. Make sure you're using LuaSTG-Flux 0.2.4 or higher.")
         return
     end
 
     if type(t) == "table" then
         local ty = ENUM_RES_TYPE[t.type]
-        lstg.TransferResource(from, ty, t.name, name) -- Name is `to` in this overload.
+        lstg.TransferResource(from, ty, t.name, name) --Name is `to` in this overload.
     elseif type(t) == "string" then
         local ty = ENUM_RES_TYPE[t]
         if ty == nil then
@@ -138,5 +147,6 @@ require("resources.sound")
 require("resources.ninepatch")
 require("resources.video")
 require("resources.ttf")
+require("resources.render_target")
 
 require("resources.audio_manager")

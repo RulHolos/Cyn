@@ -1,3 +1,4 @@
+---@class core.object.group
 core.object.group = {
     GHOST = 0,
     ENEMY_BULLET = 1,
@@ -11,6 +12,7 @@ core.object.group = {
     BOSS = 9,
 }
 
+---@class core.object.layer
 core.object.layer = {
     BACKGROUND = -900,
     ENEMIES = -800,

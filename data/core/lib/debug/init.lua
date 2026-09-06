@@ -1,6 +1,6 @@
 local imgui_exists, imgui = pcall(require, "imgui")
 if not imgui_exists then
-    print("!! ImGui was invoked but doesn't exist !!")
+    lstg.Log(4, "!! ImGui was invoked but doesn't exist !!")
 end
 ImGui = imgui.ImGui
 
@@ -174,7 +174,7 @@ local path = "data/core/lib/debug/views/"
 local patches = lstg.FileManager.EnumFiles(path, "lua");
 for _, v in ipairs(patches) do
     local file = string.sub(v[1], string.len(path) + 1, string.len(v[1]) - 4)
-    print("Adding debug view from file: " .. file)
+    lstg.Log(LOG.INFO, "Adding debug view from file: " .. file)
     core.imgui_manager:addView(require(patch .. file))
 end
 

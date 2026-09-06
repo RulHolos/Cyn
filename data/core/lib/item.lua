@@ -1,6 +1,6 @@
----@class item : core.object
+---@class core.item : core.object
 ---@field target core.object Most likely always the player
----@field collect fun(self:item, other)? Called when the item is collected by the player. `other` is the player instance.
+---@field collect fun(self:core.item, other)? Called when the item is collected by the player. `other` is the player instance.
 local item = core.object.define()
 
 ---Note: This item atlas is never deleted anywhere in code. See if this becomes an issue later. Probably not.
@@ -24,7 +24,7 @@ function item:init(x, y, t, v, angle)
     lstg.SetV(self, v, angle)
     self.v = v
     self.group = core.object.group.ITEM
-    self.layer = core.object.layer.ITEM
+    self.layer = core.object.layer.ITEMS
     self.bound = false
     self.index = t
     self.attract = 0

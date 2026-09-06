@@ -22,7 +22,7 @@ function M.from_file(path, loop_end_sec, loop_duration_sec)
 end
 
 function M:destroy()
-    lstg.RemoveResource(lstg.GetResourceStatus(), "bgm", self.name)
+    lstg.RemoveResource(self._pool, "bgm", self.name)
 end
 
 ---@return boolean Validity

@@ -65,6 +65,8 @@ function FocusLoseFunc()
     core.signals:Emit("FocusLose")
 end
 
+---Events
+
 core.signals:Register("Object Frame", "Frame", function()
     if DEBUG then
         lstg.PartialObjFrame(debug_data.frame_groups, debug_data.frame_world)

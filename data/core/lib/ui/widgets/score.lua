@@ -53,14 +53,14 @@ function w:frame()
     if score ~= self.last_score then
         self.last_score = score
         self.score_value:setText(format_score(score))
-        self.score_value:update()
     end
+    self.score_value:update()
 
     if hiscore ~= self.last_hiscore then
         self.last_hiscore = hiscore
         self.hiscore_value:setText(format_score(hiscore))
-        self.hiscore_value:update()
     end
+    self.hiscore_value:update()
 end
 
 function w:render()

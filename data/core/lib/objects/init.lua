@@ -75,6 +75,12 @@ function M.init_all()
     all_classes = {}
 end
 
+---Yeah luastg is a wonderful engine...
+---@param class core.object
+function M.resync(class)
+    class_sort(class)
+end
+
 internals = require("core.lib.objects.internal")
 
 setmetatable(M, {

@@ -1,4 +1,4 @@
----@class debug_data Only used for debugging data. Is a global table.
+---@class core.global.debug_data Only used for debugging data. Is a global table.
 debug_data = {
 	frame_groups = {},
 	frame_world = 0xFFFF,
@@ -9,42 +9,49 @@ lume = require("core.global_scripts.lume")
 toml = require("core.global_scripts.toml")
 
 -------------------------------- Strings
----@param str string
----@return string
+
+---Prettifies a raw or minified JSON string.
+---@param str string Raw or minified JSON string.
+---@return string Prettified JSON string.
 local function json_pretty(str)
-	local ret = ''
-	local indent = '	'
-	local level = 0
-	local in_string = false
-	for i = 1, #str do
-		local s = string.sub(str, i, i)
-		if s == '{' and (not in_string) then
-			level = level + 1
-			ret = ret .. '{\n' .. string.rep(indent, level)
-		elseif s == '}' and (not in_string) then
-			level = level - 1
-			ret = string.format(
-				'%s\n%s}', ret, string.rep(indent, level))
-		elseif s == '"' then
-			in_string = not in_string
-			ret = ret .. '"'
-		elseif s == ':' and (not in_string) then
-			ret = ret .. ': '
-		elseif s == ',' and (not in_string) then
-			ret = ret .. ',\n'
-			ret = ret .. string.rep(indent, level)
-		elseif s == '[' and (not in_string) then
-			level = level + 1
-			ret = ret .. '[\n' .. string.rep(indent, level)
-		elseif s == ']' and (not in_string) then
-			level = level - 1
-			ret = string.format(
-				'%s\n%s]', ret, string.rep(indent, level))
-		else
-			ret = ret .. s
-		end
-	end
-	return ret
+    local ret = {}
+    local indent = '    '
+    local level = 0
+    local in_string = false
+    local escaped = false
+
+    for i = 1, #str do
+        local char = str:sub(i, i)
+
+        if in_string then
+            ret[#ret + 1] = char
+            if char == '"' and not escaped then
+                in_string = false
+            end
+            escaped = (char == '\\' and not escaped)
+        else
+            if not char:find('%s') then
+                if char == '{' or char == '[' then
+                    level = level + 1
+                    ret[#ret + 1] = char .. '\n' .. indent:rep(level)
+                elseif char == '}' or char == ']' then
+                    level = level - 1
+                    ret[#ret + 1] = '\n' .. indent:rep(level) .. char
+                elseif char == ',' then
+                    ret[#ret + 1] = ',\n' .. indent:rep(level)
+                elseif char == ':' then
+                    ret[#ret + 1] = ': '
+                elseif char == '"' then
+                    in_string = true
+                    ret[#ret + 1] = char
+                else
+                    ret[#ret + 1] = char
+                end
+            end
+        end
+    end
+
+    return table.concat(ret)
 end
 
 string.json_pretty = json_pretty
@@ -59,7 +66,7 @@ end
 
 -------------------------------- Json
 
----@class json
+---@class core.global.json
 json = {}
 
 local cjson = require("cjson")
@@ -91,9 +98,19 @@ end
 ---Transforms a serialized string into a table, ignores functions.
 ---@param str string Serialized json
 ---@generic C
+---@param optional boolean? If true, will no-op if the file cannot be found.
 ---@return C
-function json.deserialize(str)
-	return cjson.decode(str)
+function json.deserialize(str, optional)
+	if optional then
+		local ok, result = pcall(cjson.decode, str)
+		if not ok then
+			lstg.Log(LOG.ERROR, "Failed to deserialize JSON string at path: " .. tostring(str))
+			return nil
+		end
+		return result
+	else
+		return cjson.decode(str)
+	end
 end
 
 -------------------------------- Tables
@@ -209,12 +226,12 @@ table.print = function(t, idt, seen)
 
         if type(val) == "table" and not seen[val] then
             seen[val] = true
-            print(key .. ":")
+            lstg.Log(LOG.DEBUG, key .. ":")
             table.print(val, idt + 1, seen)
             seen[val] = nil
 
         else
-            print(key .. " = " .. tostring(val))
+            lstg.Log(LOG.DEBUG, key .. " = " .. tostring(val))
         end
     end
 end
@@ -267,6 +284,15 @@ function math.wrap(value, min, max)
 end
 
 -------------------------------- Log
+
+---@class core.global.LOG
+LOG = {
+    DEBUG = 1,
+    INFO = 2,
+    WARN = 3,
+    ERROR = 4,
+    FATAL = 5,
+}
 
 function lstg.MsgBoxWarn(msg)
 	local ret = lstg.MessageBox("Warning", tostring(msg), 49)

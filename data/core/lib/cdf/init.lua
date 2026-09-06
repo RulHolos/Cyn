@@ -1,7 +1,13 @@
+---@class core.cdf.file<T>
+---@field data T Parsed CDF data.
+---@field _map table<string, table> Named CDF blocks.
+
 ---@class core.cdf
 core.cdf = {
     loaded_files = {},
     cached_strings = {},
+    ---@type table<string, fun(relative_path:string)[]>
+    change_listeners = {},
     ---@type core.cdf.parser
     parser = require("core.lib.cdf.parser")
 }
@@ -22,6 +28,8 @@ local function index_nodes(file_container, node)
     return file_container
 end
 
+---@param relative_path string
+---@return core.cdf.file
 function core.cdf.load_file(relative_path)
     relative_path = string.format("%s.cdf", relative_path)
 
@@ -32,7 +40,7 @@ function core.cdf.load_file(relative_path)
     local raw_data, err = core.cdf.parser.parse_file(relative_path)
 
     if err then
-        print("[CDF]: " .. err)
+        lstg.Log(LOG.ERROR, "[CDF]: " .. err)
         core.cdf.loaded_files[relative_path] = { data = {}, _map = {} }
         return core.cdf.loaded_files[relative_path]
     end
@@ -157,7 +165,56 @@ function core.cdf.get_path(relative_path, type_path)
     return navigate(segments, file.data, 1)
 end
 
----@param block table The parsed block node from the cdf structure
+---Discards cached data for a cdf file so the next access reparses it from disk, then
+---notifies any listener registered via `core.cdf.on_change`. Used by the hot-reload system.
+---@param relative_path string The relative path to the cdf file (without extension)
+function core.cdf.invalidate(relative_path)
+    core.cdf.loaded_files[string.format("%s.cdf", relative_path)] = nil
+
+    local prefix = relative_path .. "|"
+    for key in pairs(core.cdf.cached_strings) do
+        if key:sub(1, #prefix) == prefix then
+            core.cdf.cached_strings[key] = nil
+        end
+    end
+
+    local listeners = core.cdf.change_listeners[relative_path]
+    if listeners then
+        for _, callback in ipairs(listeners) do
+            callback(relative_path)
+        end
+    end
+end
+
+---Registers a callback invoked whenever `relative_path` is reloaded via `core.cdf.invalidate`.
+---@param relative_path string The relative path to the cdf file (without extension)
+---@param callback fun(relative_path:string)
+function core.cdf.on_change(relative_path, callback)
+    local listeners = core.cdf.change_listeners[relative_path]
+    if not listeners then
+        listeners = {}
+        core.cdf.change_listeners[relative_path] = listeners
+    end
+    table.insert(listeners, callback)
+end
+
+---Like `core.cdf.cast`, but keeps the resulting object up to date: it's automatically recasted in place whenever `relative_path` is hot-reloaded.
+---@param relative_path string The relative path to the cdf file (without extension)
+---@param block_id string|integer|table The block's name (from `Type:name`, a positional index, or an index path)
+---@param class_or_obj table|function|nil The target object to populate, or a instantiator function. If nil, creates a flat table.
+---@return table|nil @The populated game object container, kept in sync with the source file.
+function core.cdf.bind(relative_path, block_id, class_or_obj)
+    local obj = core.cdf.cast(core.cdf.get_block(relative_path, block_id), class_or_obj)
+    if obj then
+        core.cdf.on_change(relative_path, function()
+            core.cdf.cast(core.cdf.get_block(relative_path, block_id), obj)
+        end)
+    end
+    return obj
+end
+
+
+---@param block table|nil The parsed block node from the cdf structure
 ---@param class_or_obj table|function|nil The target object to populate, or a instantiator function. If nil, creates a flat table.
 ---@return table|nil @The populated game object container
 function core.cdf.cast(block, class_or_obj)

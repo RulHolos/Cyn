@@ -112,10 +112,40 @@ end
 ---@param overrides table? Optional fields to override (x, y, rot, scale_h, scale_v, order, visible, active, data, init, frame, render).
 function M:register_widget(name, overrides)
     assert(type(name) == "string" and name ~= "", "UI Manager: widget name must be a non-empty string.")
-    assert(not self._defs[name], ("UI Manager: a widget definition named '%s' already exists."):format(name))
 
+    if not self._defs[name] then
+        table.insert(self._def_order, name)
+    end
     self._defs[name] = overrides
-    table.insert(self._def_order, name)
+
+    local live = self._by_name[name]
+    if live then
+        local ambient_pool = lstg.GetResourceStatus()
+        resources.SetActivePool("stage")
+
+        if live.del then live:del() end
+        for k in pairs(live) do
+            live[k] = nil
+        end
+
+        setmetatable(live, _widget_base)
+        live.name = name
+        live.data = {}
+
+        if overrides then
+            for k, v in pairs(overrides) do
+                live[k] = v
+            end
+        end
+
+        if live.init then
+            live:init()
+        end
+
+        if ambient_pool and ambient_pool ~= "" then
+            lstg.SetResourceStatus(ambient_pool)
+        end
+    end
 end
 
 ---Creates and registers a new widget instance immediately.

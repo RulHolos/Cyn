@@ -41,7 +41,7 @@ function M.from_file(path, mipmap, a, b, rect)
 end
 
 ---Loads an image from an existing texture.
----@param tex string|resource.texture identifier of an existing texture, or texture handler.
+---@param tex string|resource.texture|resource.render_target identifier of an existing texture, or texture handler.
 ---@param a number? horizontal size of collision
 ---@param b number? vertical size of collision (same as `a` if nil.)
 ---@param rect boolean? whether to use rectangular collision instead of circular.
@@ -56,13 +56,13 @@ function M.from_texture(tex, a, b, rect)
         lstg.LoadImage(name, tex, 0, 0, w, h, a or 0, b or a or 0, rect or false)
         img.width = w
         img.height = h
-    elseif type(tex) == "table" and getmetatable(tex) == resources.texture then
+    elseif type(tex) == "table" and (getmetatable(tex) == resources.texture or getmetatable(tex) == resources.render_target) then
         name = resources.get_typed_name("img", tex.name)
         lstg.LoadImage(name, tex.name, 0, 0, tex.width, tex.height, a or 0, b or a or 0, rect or false)
         img.width = tex.width
         img.height = tex.height
     else
-        error("Invalid texture argument for image creation: must be a texture name or resource.texture instance.")
+        error("Invalid texture argument for image creation: must be a texture name or resource.texture or resource.render_target instance.")
     end
 
     img.name = name
@@ -73,7 +73,7 @@ function M.from_texture(tex, a, b, rect)
 end
 
 function M:destroy()
-    lstg.RemoveResource(lstg.GetResourceStatus(), "img", self.name)
+    lstg.RemoveResource(self._pool, "img", self.name)
 end
 
 ---Gets the size of this image.

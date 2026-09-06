@@ -1,4 +1,3 @@
----@diagnostic disable-next-line: undefined-field
 local keyboard = lstg.Input.Keyboard
 
 ---@alias KnownKeys
@@ -13,11 +12,11 @@ local keyboard = lstg.Input.Keyboard
 ---| "Retry"
 ---| "Snapshot"
 
----@class settings
+---@class core.settings
 local default_settings = {
     game = "",
     username = "Player",
-    locale = "en-us",
+    locale = "en",
     windowed = true,
     v_sync = true,
     audio_system = {
@@ -63,13 +62,18 @@ end
 function core.userdata.load_settings()
     local f, msg = io.open(get_settings_file(), 'r')
     if f then
-        ---@type settings
+        ---@type core.settings
         core.userdata.settings = json.deserialize(f:read("*a"))
         f:close()
         apply_defaults(core.userdata.settings, default_settings)
+        core.signals:Emit("settings_loaded")
     else
-        ---@type settings
+        ---@type core.settings
         core.userdata.settings = default_settings
+        lstg.Log(LOG.WARN, "Settings file not found, using default settings.")
+        if msg then
+            lstg.Log(LOG.WARN, msg)
+        end
     end
 end
 
@@ -78,6 +82,7 @@ function core.userdata.save_settings()
     if f then
         f:write(string.json_pretty(json.serialize(core.userdata.settings)))
         f:close()
+        core.signals:Emit("settings_saved")
     else
         error(msg)
     end

@@ -1,8 +1,8 @@
 ---Represents a random number generator object. (WELL512 algorithm)
----@class lstg.random
+---@class core.random
 ran = {}
 
-local well512 = lstg.Rand()
+local well512 = require("lstg.Rand").create()
 
 ---Returns a randomly generated Integer number.
 ---@param a number Minimum (inclusive)

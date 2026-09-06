@@ -45,7 +45,7 @@ core.screen = {
     halfW = 0,
     halfH = 0,
 
-    ---@type core.world_data
+    ---@type core.world.data
     ---@diagnostic disable-next-line: missing-fields
     world = {},
 }
@@ -95,7 +95,7 @@ function core.screen:setup(resetWorld)
     self.halfW = self.width / 2
     self.halfH = self.height / 2
 
-    print(("Screen setup: %dx%d(%dx%d) (scale=%.2f, dx=%.2f, dy=%.2f)")
+    lstg.Log(LOG.DEBUG, ("Screen setup: %dx%d(%dx%d) (scale=%.2f, dx=%.2f, dy=%.2f)")
         :format(self.width, self.height, core.userdata.settings.graphics_system.width, core.userdata.settings.graphics_system.height, self.scale, self.dx, self.dy))
 end
 
@@ -112,7 +112,7 @@ end
 -------------------------------------------------------------
 --- World
 
----@class core.world_data
+---@class core.world.data
 ---@field l number
 ---@field r number
 ---@field b number
@@ -151,7 +151,7 @@ local _WORLD_DEFAULT = {
 
 ---Converts a table into raw world.
 ---@param cfg table { player, bound, scroll, mask }
----@return core.world_data
+---@return core.world.data
 local function buildWorld(cfg)
     local pw, ph = cfg.play.w, cfg.play.h
     local sw, sh = cfg.scroll.w, cfg.scroll.h
@@ -214,7 +214,7 @@ function core.world:set_default(cfg)
 end
 
 ---Returns a COPY of the current world data.
----@return core.world_data
+---@return core.world.data
 function core.world:get()
     local copy = {}
     for k, v in pairs(core.screen.world) do

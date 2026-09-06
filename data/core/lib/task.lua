@@ -1,5 +1,3 @@
--- TODO: Remove the task system.
-
 local max = math.max
 local floor = math.floor
 local create = coroutine.create
@@ -7,209 +5,154 @@ local status = coroutine.status
 local resume = coroutine.resume
 local yield = coroutine.yield
 
-local FIELD = "task"
-local function _sweep(g)
-    local list, j = g.list, 0
-    for i = 1, #list do
-        local e = list[i]
-        if not e.dead and status(e.co) ~= "dead" then
-            j = j + 1
-            list[j] = e
-        else
-            e._g = nil
-        end
-    end
-    for i = j + 1, #list do
-        list[i] = nil
-    end
-    g.dirty = false
-end
+---@class core.task
+core.task = {}
 
-local function _getOrCreateGroup(target)
-    local g = rawget(target, FIELD)
-    if not g then
-        g = {
-            list = {},
-            dirty = false,
-            depth = 0
-        }
-        rawset(target, FIELD, g)
-    end
-    return g
-end
-
+local field = "__TASKS"
 local target_stack = {}
 local target_stack_n = 0
+---@type thread[]
 local co_stack = {}
 local co_stack_n = 0
 
---- Handle
-
----@class core.task.handle
-local Handle = {}
-Handle.__index = Handle
-
-function Handle:Cancel()
-    local e = self._e
-    if not e then return end
-    if not e.dead then
-        e.dead = true
-        local g = e._g
-        if g then
-            g.dirty = true
-            if g.depth == 0 then
-                _sweep(g)
-            end
-        end
+---@param target core.object
+---@param f fun()
+---@return thread
+function core.task.New(target, f)
+    ---@type table?
+    local tasks = rawget(target, field)
+    if not tasks then
+        tasks = { n = 0, gen = 0 }
+        rawset(target, field, tasks)
     end
-    self._e = nil
+
+    local co = create(f)
+    local n = tasks.n + 1
+
+    tasks[n] = co
+    tasks.n = n
+
+    return co
 end
 
-function Handle:IsRunning()
-    local e = self._e
-    if not e or e.dead then return false end
-    return status(e.co) ~= "dead"
-end
+---@param target core.object
+function core.task.Do(target)
+    local tasks = rawget(target, field)
+    if not tasks then
+        return
+    end
 
----@class core.task
-local M = {}
-core.task = M
+    local n = tasks.n
+    if n == 0 then
+        return
+    end
 
----Creates a new task attached to a target.
----
----Returns an handle. Store it in your object and call :Cancel() to cancel it.
----@param target any
----@param f function
----@return core.task.handle
-function M.New(target, f)
-    local g = _getOrCreateGroup(target)
-    local entry = {
-        co = create(f),
-        dead = false,
-        _g = g,
-    }
-    g.list[#g.list + 1] = entry
-    return setmetatable({ _e = entry }, Handle)
-end
-
----Executes all current tasks in a target.
----@param target any
-function M.Do(target)
-    local g = rawget(target, FIELD)
-    if not g then return end
-
-    local list = g.list
-    local n = #list
-
-    g.depth = g.depth + 1
+    local gen = tasks.gen
+    local write = 1
+    local errmsg
 
     for i = 1, n do
-        local e = list[i]
-        if not e.dead then
-            local co = e.co
-            if status(co) ~= "dead" then
-                target_stack_n = target_stack_n + 1
-                target_stack[target_stack_n] = target
-                co_stack_n = co_stack_n + 1
-                co_stack[co_stack_n] = co
+        if tasks.gen ~= gen then
+            break
+        end
 
-                local ok, err = resume(co)
+        local co = tasks[i]
+        if co == nil then
+            break
+        end
 
-                co_stack[co_stack_n] = nil
-                co_stack_n = co_stack_n - 1
-                target_stack[target_stack_n] = nil
-                target_stack_n = target_stack_n - 1
+        if status(co) ~= "dead" then
+            target_stack_n = target_stack_n + 1
+            target_stack[target_stack_n] = target
+            co_stack_n = co_stack_n + 1
+            co_stack[co_stack_n] = co
 
-                if not ok then
-                    e.dead = true
-                    g.dirty = true
-                    g.depth = g.depth - 1
-                    error(
-                        "task error:\n" .. tostring(err) ..
-                        "\n========== coroutine traceback ==========\n" ..
-                        debug.traceback(co) ..
-                        "\n========== C traceback =========="
-                    )
-                end
+            local result, err = resume(co)
 
-                if status(co) == "dead" then
-                    e.dead = true
-                    g.dirty = true
-                end
-            else
-                e.dead = true
-                g.dirty = true
+            co_stack[co_stack_n] = nil
+            co_stack_n = co_stack_n - 1
+            target_stack[target_stack_n] = nil
+            target_stack_n = target_stack_n - 1
+
+            if not result and not errmsg then
+                errmsg = "Task error:\n"
+                .. tostring(err)
+                .. "\n========== Coroutine Traceback ==========\n"
+                .. debug.traceback(co)
+                .. "\n========== C VM Traceback =========="
             end
+        end
+
+        if tasks.gen == gen and status(co) ~= "dead" then
+            tasks[write] = co
+            write = write + 1
         end
     end
 
-    g.depth = g.depth - 1
+    if tasks.gen == gen then
+        local total_n = tasks.n
 
-    if g.dirty and g.depth == 0 then
-        _sweep(g)
-        if #g.list == 0 then
-            rawset(target, FIELD, nil)
+        if total_n > n then
+            for i = n + 1, total_n do
+                tasks[write] = tasks[i]
+                if write ~= i then
+                    tasks[i] = nil
+                end
+                write = write + 1
+            end
         end
+
+        for i = write, total_n do
+            tasks[i] = nil
+        end
+
+        tasks.n = write - 1
+
+        if tasks.n == 0 then
+            rawset(target, field, nil)
+        end
+    end
+
+    if errmsg then
+        error(errmsg)
     end
 end
 
----Waits n number of frames.
----@param frames integer?
-function M.Wait(frames)
-    local f = floor(max(1, frames or 1))
-    for _ = 1, f do
+---@param target core.object
+---@param reserve_current boolean?
+function core.task.Clear(target, reserve_current)
+    local tasks = rawget(target, field)
+    if not tasks then
+        return
+    end
+
+    ---@type thread?
+    local co_reserved
+
+    if reserve_current and target_stack[target_stack_n] == target then
+        co_reserved = co_stack[co_stack_n]
+    end
+
+    for i = 1, tasks.n do
+        tasks[i] = nil
+    end
+
+    tasks.gen = tasks.gen + 1
+
+    if co_reserved then
+        tasks[1] = co_reserved
+        tasks.n = 1
+    else
+        tasks.n = 0
+        rawset(target, field, nil)
+    end
+end
+
+---@param frames number?
+function core.task.Wait(frames)
+    frames = max(1, floor(frames or 1))
+
+    for _ = 1, frames do
         yield()
     end
 end
-
----Cancels all tasks on target.
----If reserve_current is true, the calling task is kept.
----@param target any
----@param reserve_current boolean?
-function M.Clear(target, reserve_current)
-    local g = rawget(target, FIELD)
-    if not g then return end
-
-    local list = g.list
-    local reserved = nil
-
-    if reserve_current then
-        local current_co = co_stack[co_stack_n]
-        if current_co then
-            for i = 1, #list do
-                if list[i].co == current_co then
-                    reserved = list[i]
-                    break
-                end
-            end
-        end
-    end
-
-    for i = 1, #list do
-        local e = list[i]
-        if e ~= reserved then
-            e.dead = true
-            e._g = nil
-        end
-    end
-
-    if g.depth > 0 then
-        g.dirty = true
-    else
-        if reserved then
-            for i = 1, #list do list[i] = nil end
-            list[1] = reserved
-            g.dirty = false
-        else
-            rawset(target, FIELD, nil)
-        end
-    end
-end
-
----Returns the target of the currently executing task.
----@return any
-function M.GetSelf()
-    return target_stack[target_stack_n]
-end
-
-return M

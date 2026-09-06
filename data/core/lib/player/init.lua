@@ -144,5 +144,14 @@ function M.register_player(obj, name, full_name)
     if not M.selectable_players then
         M.selectable_players = {}
     end
+
+    for _, entry in ipairs(M.selectable_players) do
+        if entry.name == name then
+            entry.obj = obj
+            entry.full_name = full_name
+            return
+        end
+    end
+
     table.insert(M.selectable_players, { obj = obj, name = name, full_name = full_name })
 end

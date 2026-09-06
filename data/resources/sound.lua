@@ -20,7 +20,7 @@ function M.from_file(path)
 end
 
 function M:destroy()
-    lstg.RemoveResource(lstg.GetResourceStatus(), "snd", self.name)
+    lstg.RemoveResource(self._pool, "snd", self.name)
 end
 
 ---@return boolean Validity

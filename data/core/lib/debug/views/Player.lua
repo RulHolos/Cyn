@@ -8,18 +8,18 @@ local ImInputTextFlags = imgui.ImGuiInputTextFlags
 local ImTextBuffer = imgui.ImGuiTextBuffer
 local ImStyleVar = imgui.ImGuiStyleVar
 
----@class lstg.debug.PlayerDbg : lstg.debug.view
-local PlayerDbg = {}
+---@class lstg.debug.view.Player : lstg.debug.view
+local Player = {}
 
-function PlayerDbg:getWindowName() return "Player Debugger" end
-function PlayerDbg:getMenuGroup() return "Tools" end
-function PlayerDbg:getViewId() return "view.PlayerDbg" end
-function PlayerDbg:getEnabled() return self.enabled end
+function Player:getWindowName() return "Player Debugger" end
+function Player:getMenuGroup() return "Tools" end
+function Player:getViewId() return "view.Player" end
+function Player:getEnabled() return self.enabled end
 ---@param v boolean
-function PlayerDbg:setState(v) self.enabled = v end
+function Player:setState(v) self.enabled = v end
 
-function PlayerDbg:frame() end
-function PlayerDbg:layout()
+function Player:frame() end
+function Player:layout()
     local player = core.player.instance
     if player == nil then
         ImGui.Text("No player instance found.")
@@ -54,4 +54,4 @@ function PlayerDbg:layout()
     end
 end
 
-return PlayerDbg
+return Player

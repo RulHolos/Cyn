@@ -15,7 +15,7 @@ local target_stack_n = 0
 local co_stack = {}
 local co_stack_n = 0
 
----@param target core.object
+---@param target table
 ---@param f fun()
 ---@return thread
 function core.task.New(target, f)
@@ -35,7 +35,7 @@ function core.task.New(target, f)
     return co
 end
 
----@param target core.object
+---@param target table
 function core.task.Do(target)
     local tasks = rawget(target, field)
     if not tasks then
@@ -118,7 +118,7 @@ function core.task.Do(target)
     end
 end
 
----@param target core.object
+---@param target table
 ---@param reserve_current boolean?
 function core.task.Clear(target, reserve_current)
     local tasks = rawget(target, field)

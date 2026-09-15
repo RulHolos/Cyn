@@ -14,6 +14,7 @@ local levels = {'[D] ', '[I] ', '[W] ', '[E] ', '[F] '}
 
 ---@param level core.global.LOG
 ---@param text string
+---@diagnostic disable-next-line: duplicate-set-field Conscious override
 function lstg.Log(level, text)
     oldLog(level, text)
 

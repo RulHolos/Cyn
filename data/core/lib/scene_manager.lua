@@ -227,9 +227,10 @@ end
 ---  When the group is emmpty, if exists to `group.after` or menu stage.
 ---  No need to call `set_next` in this context.
 ---
----- **Orphan context**: you must have queued a destination first
----  with `set_next` or `goto`.
+---- **Orphan context**: you must have queued a destination first with `set_next` or `goto`.
 function M:switch()
+    core.userdata.flush_scoredata()
+
     self:stop_current()
 
     -- Group

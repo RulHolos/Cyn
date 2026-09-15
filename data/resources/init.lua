@@ -72,7 +72,7 @@ ENUM_RES_TYPE = { tex = 1, img = 2, ani = 3, bgm = 4, snd = 5, psi = 6, fnt = 7,
 ---@param typename ResourceTypes Resource type
 ---@param resname string Resource name
 ---@param boolResult boolean? whether to return a boolean instead of the resource name.
----@return string|boolean Resource name if exists, or true if `boolResult` is true. Otherwise returns nil.
+---@return boolean|string? Resource name if exists, or true if `boolResult` is true. Otherwise returns nil.
 function lstg.CheckNamedRes(typename, resname, boolResult)
     local t = ENUM_RES_TYPE[typename]
     if t == nil then

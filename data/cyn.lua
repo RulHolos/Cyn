@@ -2,6 +2,7 @@
 lstg = lstg or {}
 
 require("core.global_scripts.std")
+require("core.global_scripts.ipc")
 require("resources") -- Resource wrappers.
 require("core") -- Core of the library
 require("content") -- Actual game contents (players, bosses, enemis, bullets, ...)

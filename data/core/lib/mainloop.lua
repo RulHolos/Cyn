@@ -22,6 +22,8 @@ function GameInit()
 
     core.signals:Emit("Init")
     core.screen:apply()
+
+    lstg.IPC.start("LuaSTGFlux")
 end
 
 function GameExit()

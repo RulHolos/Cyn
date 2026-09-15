@@ -17,6 +17,7 @@
 local M = {}
 core = M
 core.__index = M
+---@type boolean Put this flag to `true` to make the game quit.
 core.quit_flag = false
 
 ---@generic T
@@ -69,7 +70,6 @@ require("i18n") --Don't ask why it's there. It just is...
 require("core.lib.task")
 require("core.lib.signals")
 require("core.lib.userdata")
-require("core.lib.settings")
 require("core.lib.objects")
 require("core.lib.task")
 require("core.lib.tween")

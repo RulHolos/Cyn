@@ -52,7 +52,7 @@ end
 
 ---@return boolean
 function M:is_valid()
-    return lstg.CheckNamedRes("tex", self.name, true) and lstg.IsRenderTarget(self.name)
+    return lstg.CheckNamedRes("tex", self.name) ~= nil and lstg.IsRenderTarget(self.name)
 end
 
 ---Gets the size of this render target.
@@ -82,7 +82,7 @@ end
 
 ---Pops the current render destination.
 function M:pop()
-    lstg.PopRenderTarget(self.name)
+    lstg.PopRenderTarget()
 end
 
 return M

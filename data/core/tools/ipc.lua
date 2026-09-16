@@ -13,3 +13,11 @@ end)
 lstg.IPC.register("stage_goto", function(name)
     core.stage_manager:goto(name)
 end)
+
+lstg.IPC.register("quit", function()
+    QuitFlag = true
+end)
+
+core.signals:Register("ipc_start", "GameInit", function()
+    lstg.IPC.start("LuaSTGFlux")
+end)

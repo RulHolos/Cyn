@@ -1,10 +1,13 @@
+local image = require("core.engine.resources.image")
+local image_atlas = require("core.engine.resources.image_atlas")
+
 local w = core.ui_manager.widget()
 
 function w:init()
-    self.bg = resources.image.from_file("assets/ui/ui_bg.png", true)
+    self.bg = image.from_file("assets/ui/ui_bg.png", true)
     self.bg:set_sampler_state("point+clamp")
 
-    self.lines = resources.image_atlas.from_file("assets/ui/line.png", true)
+    self.lines = image_atlas.from_file("assets/ui/line.png", true)
     self.lines:set_sampler_state("point+wrap")
     self.lines:add_image_group("line_", 0, 0, 200, 8, 1, 7)
 

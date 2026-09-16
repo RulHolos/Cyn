@@ -11,6 +11,8 @@
 ---Any module registering itself into a named registry at top-level (understand, objects definitions) must make that registration idempotently (replace-by-name).
 ---
 ---Note: This system does NOT guard against crashes. You want your game to crash if you want to fix it.
+---
+---<b>WARNING: This system is extremely janky. Use at your own risks (but let's be real, what are the REAL risks here, it's not like you'll lose data)</b>
 ---@class core.hot_reload
 local M = {
     enabled = true,
@@ -190,4 +192,4 @@ end
 
 start()
 
-core.signals:Register("Hot Reload", "Frame", M.poll, 1e9)
+core.signals:Register("Hot Reload", "FrameFunc", M.poll, 1e9)

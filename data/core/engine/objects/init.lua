@@ -2,19 +2,9 @@
 
 ---@class core.object
 local M = {}
-core.object = M
 
-require("core.lib.objects.groups")
-
----@generic C
----@param class_type C
----@return C
-function makeInstance(class_type)
-    class_type.__index = class_type
-    local instance = {}
-    setmetatable(instance, class_type)
-    return instance
-end
+local pair = require("core.engine.objects.groups")
+M.group, M.layer = pair[1], pair[2]
 
 ---@param self core.object
 local noop = function(self) end
@@ -81,7 +71,7 @@ function M.resync(class)
     class_sort(class)
 end
 
-internals = require("core.lib.objects.internal")
+internals = require("core.engine.objects.internal")
 
 setmetatable(M, {
     __index = function(k, v)
@@ -92,3 +82,5 @@ setmetatable(M, {
         end
     end
 })
+
+return M

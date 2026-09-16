@@ -1,10 +1,13 @@
+local image_atlas = require("core.engine.resources.image_atlas")
+local audio_manager = require("core.engine.resources.audio_manager")
+
 ---@class core.item : core.object
 ---@field target core.object Most likely always the player
 ---@field collect fun(self:core.item, other)? Called when the item is collected by the player. `other` is the player instance.
 local item = core.object.define()
 
 ---Note: This item atlas is never deleted anywhere in code. See if this becomes an issue later. Probably not.
-local item_atlas = resources.image_atlas.from_file("assets/general/item.png")
+local item_atlas = image_atlas.from_file("assets/general/item.png")
 item_atlas:set_sampler_state("point+wrap")
 
 local item_img = item_atlas:add_image_group("item_", 0, 0, 32, 32, 2, 6, 8, 8)
@@ -73,6 +76,6 @@ function item:colli(other)
             self.class.collect(self, other)
         end
         lstg.Kill(self)
-        resources.audio_manager.play_se("item00", 0.3, self.x / (core.world._default.play.w / 2))
+        audio_manager.play_se("item00", 0.3, self.x / (core.world._default.play.w / 2))
     end
 end

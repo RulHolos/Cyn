@@ -1,3 +1,7 @@
+local common = require("core.engine.resources.common")
+local texture = require("core.engine.resources.texture")
+local render_target = require("core.engine.resources.render_target")
+
 ---@class resource.image : resource_base
 local M = {
     name = "",
@@ -10,7 +14,6 @@ local M = {
     ---@type BlendMode
     blendmode = "",
 }
-resources.image = M
 
 ---Loads an image from a file.
 ---@param path string path to the image file.
@@ -20,12 +23,12 @@ resources.image = M
 ---@param rect boolean? whether to use rectangular collision instead of circular.
 ---@return resource.image Image
 function M.from_file(path, mipmap, a, b, rect)
-    local name = resources.get_typed_name("img", path)
-    local name_tex = resources.get_typed_name("tex", path)
+    local name = common.get_typed_name("img", path)
+    local name_tex = common.get_typed_name("tex", path)
 
     lstg.LoadTexture(name_tex, path, mipmap)
-    if resources.default_sampler_state then
-        lstg.SetTextureSamplerState(name_tex, resources.default_sampler_state)
+    if common.default_sampler_state then
+        lstg.SetTextureSamplerState(name_tex, common.default_sampler_state)
     end
     local w, h = lstg.GetTextureSize(name_tex)
     lstg.LoadImage(name, name_tex, 0, 0, w, h, a or 0, b or a or 0, rect or false)
@@ -52,12 +55,12 @@ function M.from_texture(tex, a, b, rect)
 
     if type(tex) == "string" then
         local w, h = lstg.GetTextureSize(tex)
-        name = resources.get_typed_name("img", tex)
+        name = common.get_typed_name("img", tex)
         lstg.LoadImage(name, tex, 0, 0, w, h, a or 0, b or a or 0, rect or false)
         img.width = w
         img.height = h
-    elseif type(tex) == "table" and (getmetatable(tex) == resources.texture or getmetatable(tex) == resources.render_target) then
-        name = resources.get_typed_name("img", tex.name)
+    elseif type(tex) == "table" and (getmetatable(tex) == texture or getmetatable(tex) == render_target) then
+        name = common.get_typed_name("img", tex.name)
         lstg.LoadImage(name, tex.name, 0, 0, tex.width, tex.height, a or 0, b or a or 0, rect or false)
         img.width = tex.width
         img.height = tex.height
@@ -117,7 +120,7 @@ end
 ---Sets the sampler state of this image.
 ---@param sampler_state SamplerState
 function M:set_sampler_state(sampler_state)
-    local name_tex = resources.get_typed_name("tex", self.name)
+    local name_tex = common.get_typed_name("tex", self.name)
     lstg.SetTextureSamplerState(name_tex, sampler_state)
 end
 
@@ -177,3 +180,5 @@ end
 function M:render_3d(x, y, z, rot_x, rot_y, rot_z, scale_x, scale_y)
     lstg.Render3D(self.name, x, y, z, rot_x, rot_y, rot_z, scale_x, scale_y)
 end
+
+return M

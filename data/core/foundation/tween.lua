@@ -1,8 +1,7 @@
-local Easing = require("core.global_scripts.easing")
+local easing = require("core.global_scripts.easing")
 
 ---@class core.tween
 local M = {}
-core.tween = M
 
 local TWEEN_FIELD = "__core_tweens"
 
@@ -39,7 +38,7 @@ function TweenInstance.new(target, properties, duration)
     self.id = "default"
     self.finished = false
     self.active = true
-    self._easing = Easing.linear
+    self._easing = easing.linear
     self._repeatCount = 0
     self._completedCount = 0
     self._yoyo = false
@@ -60,7 +59,7 @@ end
 ---@return core.tween.instance
 function TweenInstance:ease(ease)
     if type(ease) == "string" then
-        self._easing = Easing[ease] or Easing.linear
+        self._easing = easing[ease] or easing.linear
     else
         self._easing = ease
     end

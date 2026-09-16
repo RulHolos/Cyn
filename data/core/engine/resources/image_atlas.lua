@@ -1,3 +1,8 @@
+local common = require("core.engine.resources.common")
+local image = require("core.engine.resources.image")
+local texture = require("core.engine.resources.texture")
+local render_target = require("core.engine.resources.render_target")
+
 ---@class resource.image_atlas : resource_base
 local M = {
     name = "",
@@ -5,18 +10,17 @@ local M = {
     ---@type table<string, resource.image> Sub-images loaded from this atlas, keyed by name suffix.
     parts = {},
 }
-resources.image_atlas = M
 
 ---Creates a basic empty atlas from a texture.
 ---@param path string path to the texture file.
 ---@param mipmap boolean? whether to generate mipmaps.
 ---@return resource.image_atlas
 function M.from_file(path, mipmap)
-    local name_tex = resources.get_typed_name("tex", path)
+    local name_tex = common.get_typed_name("tex", path)
 
     lstg.LoadTexture(name_tex, path, mipmap or false)
-    if resources.default_sampler_state then
-        lstg.SetTextureSamplerState(name_tex, resources.default_sampler_state)
+    if common.default_sampler_state then
+        lstg.SetTextureSamplerState(name_tex, common.default_sampler_state)
     end
 
     local atlas = makeInstance(M)
@@ -30,7 +34,7 @@ function M.from_texture(tex)
 
     if type(tex) == "string" then
         name = tex
-    elseif type(tex) == "table" and (getmetatable(tex) == resources.texture or getmetatable(tex) == resources.render_target) then
+    elseif type(tex) == "table" and (getmetatable(tex) == texture or getmetatable(tex) == render_target) then
         name = tex.name
     else
         error("Invalid texture argument for atlas creation: must be a texture name or resource.texture or resource.render_target instance.")
@@ -90,7 +94,7 @@ end
 function M:add_image(name_suffix, x, y, w, h, a, b, rect)
     local name = self.name .. "/" .. name_suffix
     lstg.LoadImage(name, self.name, x, y, w, h, a or 0, b or a or 0, rect or false)
-    local img = makeInstance(resources.image)
+    local img = makeInstance(image)
     img.name = name
     img.width = w
     img.height = h
@@ -116,7 +120,7 @@ function M:add_animation_strip(name_prefix, x, y, w, h, count, a, b, rect)
     for i = 1, count do
         local name = self.name .. "/" .. name_prefix .. i
         lstg.LoadImage(name, self.name, x + (i - 1) * w, y, w, h, a or 0, b or a or 0, rect or false)
-        local img = makeInstance(resources.image)
+        local img = makeInstance(image)
         img.name = name
         img.width = w
         img.height = h
@@ -147,7 +151,7 @@ function M:add_image_group(name_prefix, x, y, w, h, cols, rows, a, b, rect)
         local suffix = name_prefix .. (i + 1)
         local name = self.name .. "/" .. suffix
         lstg.LoadImage(name, self.name, x + w * (i % cols), y + h * math.floor(i / cols), w, h, a or 0, b or a or 0, rect or false)
-        local img = makeInstance(resources.image)
+        local img = makeInstance(image)
         img.name = name
         img.width = w
         img.height = h
@@ -159,3 +163,5 @@ function M:add_image_group(name_prefix, x, y, w, h, cols, rows, a, b, rect)
     end
     return images
 end
+
+return M

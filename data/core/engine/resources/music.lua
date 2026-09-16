@@ -1,10 +1,11 @@
+local common = require("core.engine.resources.common")
+
 ---@class resource.music : resource_base
 local M = {
     name = "",
     type = "bgm",
     volume = 1,
 }
-resources.music = M
 
 ---Loads a music from a file. Supports WAV and OGG. OGG format is recommended.
 ---@param path string
@@ -12,7 +13,7 @@ resources.music = M
 ---@param loop_duration_sec number? Loop duration in seconds. If 0 or nil, the loop will be seamless.
 ---@return resource.music Music
 function M.from_file(path, loop_end_sec, loop_duration_sec)
-    local name = resources.get_typed_name("bgm", path)
+    local name = common.get_typed_name("bgm", path)
 
     lstg.LoadMusic(name, path, loop_end_sec or 0, loop_duration_sec or 0)
 
@@ -75,3 +76,5 @@ end
 function M:resume()
     lstg.ResumeMusic(self.name)
 end
+
+return M

@@ -276,9 +276,9 @@ function M.tick_score()
     end
     gs.score = math.min(cur + step, target)
 end
-core.signals:Register("tick_score", "Frame", M.tick_score)
+core.signals:Register("tick_score", "FrameFunc", M.tick_score)
 
-core.signals:Register("flush_scoredata", "Quit", function()
+core.signals:Register("flush_scoredata", "GameExit", function()
     M.flush_scoredata()
     M.close_scoredata()
 end)

@@ -1,5 +1,5 @@
 ---@class core.object.group
-core.object.group = {
+local groups = {
     GHOST = 0,
     ENEMY_BULLET = 1,
     ENEMY = 2,
@@ -13,7 +13,7 @@ core.object.group = {
 }
 
 ---@class core.object.layer
-core.object.layer = {
+local layers = {
     BACKGROUND = -900,
     ENEMIES = -800,
     PLAYER_BULLETS = -700,
@@ -25,3 +25,5 @@ core.object.layer = {
     FOREGROUND = -100,
     TOP = 0,
 }
+
+return { groups, layers }

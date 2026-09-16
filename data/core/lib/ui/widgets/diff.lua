@@ -1,3 +1,5 @@
+local ttf = require("core.engine.resources.ttf")
+
 local w = core.ui_manager.widget()
 
 local function get_stage_label()
@@ -12,7 +14,7 @@ local function get_stage_label()
 end
 
 function w:init()
-    self.font = resources.ttf.from_file("assets/fonts/score2.ttf", 16)
+    self.font = ttf.from_file("assets/fonts/score2.ttf", 16)
 
     self.fps = lstg.RichText.createFromPool(self.font.name, 16)
         :setAlignment("center", "top")

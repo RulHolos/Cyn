@@ -2,6 +2,8 @@
 -- UI Manager   --
 -- ============ --
 
+local resource_common = require("core.engine.resources.common")
+
 ------------------------------------------------------------
 --- Widget base
 
@@ -121,7 +123,7 @@ function M:register_widget(name, overrides)
     local live = self._by_name[name]
     if live then
         local ambient_pool = lstg.GetResourceStatus()
-        resources.SetActivePool("stage")
+        resource_common.set_active_pool("stage")
 
         if live.del then live:del() end
         for k in pairs(live) do
@@ -241,8 +243,8 @@ function M:render()
     end
 end
 
-core.signals:Register("ui_manager:frame", "Frame", function() M:frame() end, 998)
-core.signals:Register("ui_manager:render", "Render", function() M:render() end, 998)
+core.signals:Register("ui_manager:frame", "FrameFunc", function() M:frame() end, 998)
+core.signals:Register("ui_manager:render", "RenderFunc", function() M:render() end, 998)
 core.signals:Register("ui_manager:stage_start", "stage:start", function()
     M:clear()
     M:spawn_registered_widgets()

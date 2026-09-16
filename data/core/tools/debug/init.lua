@@ -193,6 +193,11 @@ function V:setState(enable) self.enabled = enable end
 function V:frame() end
 function V:layout() end
 
-core.imgui_manager:initializeCategories()
+M:initializeCategories()
+
+local signals = require("core.foundation.signals")
+signals:Register("ImGuiRender", "RenderFunc", function()
+    M:render()
+end, signals.LOW_PRIORITY, M)
 
 return M

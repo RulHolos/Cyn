@@ -1,8 +1,10 @@
+local image_atlas = require("core.engine.resources.image_atlas")
+
 ---@class content.players.reimu : core.player
 local M = core.object.define(core.player)
 
 function M:init()
-    self.atlas = resources.image_atlas.from_file("assets/players/reimu/reimu.png")
+    self.atlas = image_atlas.from_file("assets/players/reimu/reimu.png")
     core.player.init(self)
     self.bound = false
 

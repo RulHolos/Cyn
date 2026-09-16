@@ -1,3 +1,5 @@
+local ttf = require("core.engine.resources.ttf")
+
 local w = core.ui_manager.widget()
 
 local function format_score(score)
@@ -20,8 +22,8 @@ local function set_common_text(rt, r, g, b)
 end
 
 function w:init()
-    self.font = resources.ttf.from_file("assets/fonts/score.ttf", 16)
-    self.font2 = resources.ttf.from_file("assets/fonts/score2.ttf", 10)
+    self.font = ttf.from_file("assets/fonts/score.ttf", 16)
+    self.font2 = ttf.from_file("assets/fonts/score2.ttf", 10)
 
     self.last_score = -1
     self.last_hiscore = -1

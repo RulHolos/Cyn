@@ -1,3 +1,5 @@
+local audio_manager = require("core.engine.resources.audio_manager")
+
 ---@class core.player.behavior.power : core.player.behavior
 local M = core.player.behavior.define("power")
 
@@ -28,7 +30,7 @@ function M:init()
         core.userdata.gamestate.power = self.current_power
         local after = math.floor(self.current_power / 100)
         if after > before then
-            resources.audio_manager.play_se("powerup1", 0.5)
+            audio_manager.play_se("powerup1", 0.5)
         end
         -- If get more power than max amount possible, add to score.
         if self.current_power >= self.max_power then

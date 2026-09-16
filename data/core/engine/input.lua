@@ -12,8 +12,6 @@ end
 
 ---@class core.input
 local M = {}
-M.__index = M
-core.input = M
 
 ---@type table<string, boolean>
 local keyState = {}
@@ -90,3 +88,11 @@ function M:key_to_name(code)
     end
     return ("KEY %d"):format(code)
 end
+
+local signals = require("core.foundation.signals")
+
+signals:Register("KeyFrame", "FrameFunc", function()
+    M:refresh()
+end, signals.HIGH_PRIORITY, M)
+
+return M

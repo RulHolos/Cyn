@@ -1,6 +1,9 @@
 ---@class core.menu.cfg
 ---@field use_mouse boolean If true, mouse control will be enabled for the entire menu.
 
+local render_target = require("core.engine.resources.render_target")
+local image = require("core.engine.resources.image")
+
 ---@type core.cdf.file<core.menu.cfg>
 local cfg = core.cdf.load_file("data/content/menu/config")
 
@@ -23,8 +26,8 @@ function menu_panel:init(x, y)
 
     self.lock = true
 
-    self.rt = resources.render_target.new("menu_panel" .. rt_count)
-    self.img_rt = resources.image.from_texture(self.rt)
+    self.rt = render_target.new("menu_panel" .. rt_count)
+    self.img_rt = image.from_texture(self.rt)
     rt_count = rt_count + 1
 end
 

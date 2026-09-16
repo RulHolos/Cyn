@@ -318,7 +318,7 @@ function M:load_stage(stage)
     self.current_stage = stage
     self.current_stage.timer = 0
     self.current_stage:init()
-    core.signals:Get("ui_manager:render", "Render"):SetEnabled(not self.current_stage.is_menu) --Only allow if the current stage is a game stage.
+    core.signals:Get("ui_manager:render", "RenderFunc"):SetEnabled(not self.current_stage.is_menu) --Only allow if the current stage is a game stage.
 
     core.signals:Emit("stage:start", self.current_stage)
 end
@@ -341,14 +341,14 @@ function M:_render()
     self.current_stage:render()
 end
 
-core.signals:Register("stage_manager:init", "Init", function()
+core.signals:Register("stage_manager:init", "GameInit", function()
     if not M.entry_name and not M.next then
         error("StageManager: no entry point defined. Please create a stage with the 'entry_point' flag or queue a stage/group with set_next.")
     end
     M:switch()
 end)
 
-core.signals:Register("stage_manager:frame", "Frame", function() M:_frame() end, 999)
-core.signals:Register("stage_manager:render", "Render", function() M:_render() end, 999)
+core.signals:Register("stage_manager:frame", "FrameFunc", function() M:_frame() end, 999)
+core.signals:Register("stage_manager:render", "RenderFunc", function() M:_render() end, 999)
 
 return M

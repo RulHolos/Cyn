@@ -8,6 +8,16 @@ debug_data = {
 lume = require("core.global_scripts.lume")
 toml = require("core.global_scripts.toml")
 
+---@generic C
+---@param class_type C
+---@return C
+function makeInstance(class_type)
+    class_type.__index = class_type
+    local instance = {}
+    setmetatable(instance, class_type)
+    return instance
+end
+
 -------------------------------- Strings
 
 ---Prettifies a raw or minified JSON string.
@@ -87,12 +97,18 @@ local function visit_table(t)
 end
 
 ---Visits a table and serializes it to json.
+---@param t table The table to serialize.
+---@param pretty boolean? Whether to prettify the JSON output. Default to false
 ---@return string @Serialized table in string format
-function json.serialize(t)
+function json.serialize(t, pretty)
 	if type(t) == "table" then
 		t = visit_table(t)
 	end
-	return cjson.encode(t)
+	if pretty then
+		return string.json_pretty(cjson.encode(t))
+	else
+		return cjson.encode(t)
+	end
 end
 
 ---Transforms a serialized string into a table, ignores functions.
@@ -299,13 +315,13 @@ LOG = {
 function lstg.MsgBoxWarn(msg)
 	local ret = lstg.MessageBox("Warning", tostring(msg), 49)
 	if ret == 2 then
-		core.quit_flag = true
+		QuitFlag = true
 	end
 end
 
 function lstg.MsgBoxError(msg, title, exit)
 	local ret = lstg.MessageBox(title, tostring(msg), 16)
 	if ret == 1 and exit then
-		core.quit_flag = true
+		QuitFlag = true
 	end
 end

@@ -1,6 +1,8 @@
 ---Audio Manager. Handles loading musics and sound effects.
 ---Can be used to store sounds and musics to play them later more easily than loading them each time.
 
+local sound = require("core.engine.resources.sound")
+
 local audio_manager = {
     ---@type table<string, resource.sound>
     sounds = {},
@@ -8,7 +10,6 @@ local audio_manager = {
     musics = {},
 }
 audio_manager.__index = audio_manager
-resources.audio_manager = audio_manager
 
 local se_path = "assets/se/"
 
@@ -32,7 +33,7 @@ function audio_manager.load_se()
         end
         local full_path = se_path .. "se_" .. k .. ".wav"
 
-        local res = resources.sound.from_file(full_path)
+        local res = sound.from_file(full_path)
         if res then
             res:set_volume(v)
             audio_manager.sounds[k] = res

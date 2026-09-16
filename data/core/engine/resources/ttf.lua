@@ -1,3 +1,5 @@
+local common = require("core.engine.resources.common")
+
 ---@class resource.ttf : resource_base
 local M = {
     name = "",
@@ -6,10 +8,9 @@ local M = {
     ---@type BlendMode
     blendmode = "",
 }
-resources.ttf = M
 
 function M.from_file(path, size)
-    local name = resources.get_typed_name("ttf", path)
+    local name = common.get_typed_name("ttf", path)
 
     lstg.LoadTTF(name, path, size, size)
 
@@ -44,3 +45,5 @@ function M:set_state(blendmode, color)
     lstg.RichText:setState(blendmode, color)
     self.blendmode = blendmode
 end
+
+return M

@@ -5,8 +5,9 @@ local status = coroutine.status
 local resume = coroutine.resume
 local yield = coroutine.yield
 
+---Wrapper around coroutine-based tasks.
 ---@class core.task
-core.task = {}
+local task = {}
 
 local field = "__TASKS"
 local target_stack = {}
@@ -18,7 +19,7 @@ local co_stack_n = 0
 ---@param target table
 ---@param f fun()
 ---@return thread
-function core.task.New(target, f)
+function task.New(target, f)
     ---@type table?
     local tasks = rawget(target, field)
     if not tasks then
@@ -36,7 +37,7 @@ function core.task.New(target, f)
 end
 
 ---@param target table
-function core.task.Do(target)
+function task.Do(target)
     local tasks = rawget(target, field)
     if not tasks then
         return
@@ -120,7 +121,7 @@ end
 
 ---@param target table
 ---@param reserve_current boolean?
-function core.task.Clear(target, reserve_current)
+function task.Clear(target, reserve_current)
     local tasks = rawget(target, field)
     if not tasks then
         return
@@ -149,10 +150,12 @@ function core.task.Clear(target, reserve_current)
 end
 
 ---@param frames number?
-function core.task.Wait(frames)
+function task.Wait(frames)
     frames = max(1, floor(frames or 1))
 
     for _ = 1, frames do
         yield()
     end
 end
+
+return task

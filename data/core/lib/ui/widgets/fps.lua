@@ -1,7 +1,9 @@
+local ttf = require("core.engine.resources.ttf")
+
 local w = core.ui_manager.widget()
 
 function w:init()
-    self.font = resources.ttf.from_file("assets/fonts/score2.ttf", 5)
+    self.font = ttf.from_file("assets/fonts/score2.ttf", 5)
 
     self.fps = lstg.RichText.createFromPool(self.font.name, 5)
     self.fps:setAlignment("right", "bottom")

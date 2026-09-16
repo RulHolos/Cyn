@@ -1,16 +1,17 @@
+local common = require("core.engine.resources.common")
+
 ---@class resource.sound : resource_base
 local M = {
     name = "",
     type = "snd",
     volume = 1,
 }
-resources.sound = M
 
 ---Loads a sound from a file. Supports WAV and OGG. OGG format is recommended.
 ---@param path string
 ---@return resource.sound Sound
 function M.from_file(path)
-    local name = resources.get_typed_name("snd", path)
+    local name = common.get_typed_name("snd", path)
 
     lstg.LoadSound(name, path)
 
@@ -73,3 +74,5 @@ end
 function M:resume()
     lstg.ResumeSound(self.name)
 end
+
+return M

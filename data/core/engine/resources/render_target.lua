@@ -1,3 +1,5 @@
+local common = require("core.engine.resources.common")
+
 ---@class resource.render_target : resource_base
 ---@field width number
 ---@field height number
@@ -7,7 +9,6 @@ local M = {
     width = 0,
     height = 0,
 }
-resources.render_target = M
 
 ---Creates a render target texture.
 ---@param name string Internal resource name.
@@ -19,8 +20,8 @@ function M.from_size(name, width, height)
     assert(width > 0 and height > 0, "Render target dimensions must be positive.")
 
     lstg.CreateRenderTarget(name, width, height)
-    if resources.default_sampler_state then
-        lstg.SetTextureSamplerState(name, resources.default_sampler_state)
+    if common.default_sampler_state then
+        lstg.SetTextureSamplerState(name, common.default_sampler_state)
     end
 
     local target = makeInstance(M)
@@ -34,8 +35,8 @@ function M.new(name)
     assert(type(name) == "string" and name ~= "", "Render target name must be a non-empty string.")
 
     lstg.CreateRenderTarget(name)
-    if resources.default_sampler_state then
-        lstg.SetTextureSamplerState(name, resources.default_sampler_state)
+    if common.default_sampler_state then
+        lstg.SetTextureSamplerState(name, common.default_sampler_state)
     end
 
     ---TODO: Return correct width and height

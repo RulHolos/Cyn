@@ -1,3 +1,5 @@
+local image = require("core.engine.resources.image")
+
 ---@class core.background.temple : core.background
 local M = core.object.define(core.background)
 core.background.temple = M
@@ -5,9 +7,9 @@ core.background.temple = M
 function M:init()
     core.background.init(self, false)
 
-    self.res_road = resources.image.from_file('core/lib/background/temple/road.png')
-    self.res_ground = resources.image.from_file('core/lib/background/temple/ground.png')
-    self.res_pillar = resources.image.from_file('core/lib/background/temple/pillar.png')
+    self.res_road = image.from_file('core/lib/background/temple/road.png')
+    self.res_ground = image.from_file('core/lib/background/temple/ground.png')
+    self.res_pillar = image.from_file('core/lib/background/temple/pillar.png')
 
     core.camera3d:set({
         eye = { x = 0, y = 2.5, z = -4 },

@@ -113,13 +113,11 @@ end
 local M = {
     _groups = {},
     _individual = {},
-}
 
----Creates a signal instance.
----@return core.signals
-function M.new()
-    return makeInstance(M)
-end
+    LOW_PRIORITY = -1000,
+    MEDIUM_PRIORITY = 0,
+    HIGH_PRIORITY = 1000,
+}
 
 ---Registers a callback.
 ---
@@ -325,7 +323,5 @@ function M:SetGroupEnabled(group, enabled)
     local g = self._groups[group]
     if g then g.enabled = enabled end
 end
-
-core.signals = M.new()
 
 return M

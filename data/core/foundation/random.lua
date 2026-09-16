@@ -1,6 +1,6 @@
 ---Represents a random number generator object. (WELL512 algorithm)
 ---@class core.random
-ran = {}
+local ran = {}
 
 local well512 = require("lstg.Rand").create()
 
@@ -52,3 +52,5 @@ function ran:Choose(...)
     local n = ran:Int(1, #args)
     return args[n]
 end
+
+return ran

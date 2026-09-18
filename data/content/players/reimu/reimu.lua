@@ -1,7 +1,9 @@
+local object = require("core.engine.objects")
 local image_atlas = require("core.engine.resources.image_atlas")
+local view = require("core.engine.viewport.view")
 
 ---@class content.players.reimu : core.player
-local M = core.object.define(core.player)
+local M = object.define(core.player)
 
 function M:init()
     self.atlas = image_atlas.from_file("assets/players/reimu/reimu.png")
@@ -28,7 +30,7 @@ function M:frame()
 end
 
 function M:render()
-    core.view:set('world')
+    view:set('world')
     core.player.render(self)
 end
 

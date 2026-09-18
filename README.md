@@ -30,7 +30,7 @@
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li><a href="#about-the-project">About Cyn</a></li>
+    <li><a href="#about-cyn">About Cyn</a></li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
@@ -49,7 +49,10 @@
 <!-- ABOUT CYN -->
 ## About Cyn
 
-///
+Cyn is a modular library for the [LuaSTG-Flux](https://github.com/RulHolos/LuaSTG-Flux) engine.<br>
+It's packaged with two frameworks: A re-implementation of THlib on the Cyn Library and the newly introduced Yeva Framework.
+
+Both frameworks are packaged inside this repository as they cannot be used on their own and require the Cyn library to work.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -81,7 +84,9 @@
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] ///
+- [ ] Cyn Library
+- [ ] THlib Framework
+- [ ] Yeva Framework
 
 See the [open issues](https://github.com/RulHolos/Cyn/issues) for a full list of proposed features (and known issues).
 

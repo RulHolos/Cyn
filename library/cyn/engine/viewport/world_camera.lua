@@ -61,7 +61,7 @@ end
 ---@return number l, number r, number b, number t
 function M:get_transformed_bounds()
     local s = self._state
-    local w = world.data
+    local w = world.current
 
     local ww = (w.r - w.l) / s.sx
     local wh = (w.t - w.b) / s.sy

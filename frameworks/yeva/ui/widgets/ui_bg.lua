@@ -1,7 +1,10 @@
-local image = require("core.engine.resources.image")
-local image_atlas = require("core.engine.resources.image_atlas")
+local ui_manager = require("yeva.ui")
+local view = require("cyn.engine.viewport.view")
+local world = require("cyn.engine.viewport.world")
+local image = require("cyn.engine.resources.image")
+local image_atlas = require("cyn.engine.resources.image_atlas")
 
-local w = core.ui_manager.widget()
+local w = ui_manager.widget()
 
 function w:init()
     self.bg = image.from_file("assets/ui/ui_bg.png", true)
@@ -11,7 +14,7 @@ function w:init()
     self.lines:set_sampler_state("point+wrap")
     self.lines:add_image_group("line_", 0, 0, 200, 8, 1, 7)
 
-    local wo = core.screen.world
+    local wo = world.current
     self.line_list = {
         { "line_1", 109 + wo.scrr, wo.scrt - 45, 0, 1, 1 },
         { "line_2", 109 + wo.scrr, wo.scrt - 67, 0, 1, 1 },
@@ -27,7 +30,7 @@ function w:frame()
 end
 
 function w:render()
-    core.view:set("ui")
+    view:set("ui")
     if self.bg then
         self.bg:render_screen()
     end
@@ -52,4 +55,4 @@ function w:del()
     end
 end
 
-core.ui_manager:register_widget("bg_ui", w)
+ui_manager:register_widget("bg_ui", w)

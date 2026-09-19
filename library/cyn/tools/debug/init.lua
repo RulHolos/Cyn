@@ -197,8 +197,15 @@ function V:layout() end
 M:initializeCategories()
 
 local signals = require("cyn.foundation.signals")
-signals:Register("ImGuiRender", "RenderFunc", function()
+signals:Register("ImGuiRender", signals.known_signals.RenderFunc, function()
     M:render()
+end, signals.LOW_PRIORITY, M)
+
+signals:Register("ImGuiFrame", signals.known_signals.BeforeFrameFunc, function()
+    M:frame()
+end, signals.LOW_PRIORITY, M)
+signals:Register("ImGuiLayout", signals.known_signals.AfterFrameFunc, function()
+    M:layout()
 end, signals.LOW_PRIORITY, M)
 
 return M

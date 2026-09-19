@@ -1,6 +1,9 @@
-local ttf = require("core.engine.resources.ttf")
+local ui_manager = require("yeva.ui")
+local view = require("cyn.engine.viewport.view")
+local world = require("cyn.engine.viewport.world")
+local ttf = require("cyn.engine.resources.ttf")
 
-local w = core.ui_manager.widget()
+local w = ui_manager.widget()
 
 local function format_score(score)
     score = math.max(0, math.min(score, 99999999999))
@@ -66,8 +69,8 @@ function w:frame()
 end
 
 function w:render()
-    core.view:set("ui")
-    local wo = core.screen.world
+    view:set("ui")
+    local wo = world.current
 
     --HiScore
     self.hiscore:render(wo.scrr + 12, wo.scrt - 39)
@@ -106,4 +109,4 @@ function w:del()
     end
 end
 
-core.ui_manager:register_widget("score_ui", w)
+ui_manager:register_widget("score_ui", w)

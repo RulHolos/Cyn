@@ -1,3 +1,4 @@
+local signals = require("cyn.foundation.signals")
 local imgui_exists, imgui = pcall(require, "imgui")
 
 local ImGui = imgui.ImGui
@@ -36,11 +37,11 @@ function Event_Viewer:layoutGroupSignals()
     ImGui.BeginChild("ScrollRegionGroup", ImVec2(0, -ImGui.GetFrameHeightWithSpacing()), 0, ImWindowFlags.HorizontalScrollbar)
     do
         ImGui.PushStyleVar(ImStyleVar.ItemSpacing, ImVec2(4, 1))
-        for groupName, g in pairs(cyn.signals._groups) do
-            -- Group-level checkbox, shown inline with the tree node label.
+        for groupName, g in pairs(signals._groups) do
+            --Group-level checkbox, shown inline with the tree node label.
             local changed, newVal = ImGui.Checkbox("##grp_" .. groupName, g.enabled)
             if changed then
-                cyn.signals:SetGroupEnabled(groupName, newVal)
+                signals:SetGroupEnabled(groupName, newVal)
             end
             ImGui.SameLine()
 
@@ -71,7 +72,7 @@ function Event_Viewer:layoutIndividualSignals()
     ImGui.BeginChild("ScrollRegionIndividual", ImVec2(0, -ImGui.GetFrameHeightWithSpacing()), 0, ImWindowFlags.HorizontalScrollbar)
     do
         ImGui.PushStyleVar(ImStyleVar.ItemSpacing, ImVec2(4, 1))
-        for name, e in pairs(cyn.signals._individual) do
+        for name, e in pairs(signals._individual) do
             if not e.dead then
                 local changed, newVal = ImGui.Checkbox("##ind_" .. name, e.enabled)
                 if changed then

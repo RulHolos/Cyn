@@ -90,16 +90,19 @@ function Handle:Disconnect()
     self._e = nil
 end
 
+---@return boolean Connected
 function Handle:IsConnected()
     return self._e ~= nil and not self._e.dead
 end
 
+---@param enabled boolean
 function Handle:SetEnabled(enabled)
     if self._e then
         self._e.enabled = enabled
     end
 end
 
+---@return boolean Enabled
 function Handle:IsEnabled()
     return self._e ~= nil and not self._e.dead and self._e.enabled
 end
@@ -122,7 +125,9 @@ local M = {
 M.known_signals = {
     GameInit = "GameInit",
     GameExit = "GameExit",
+    BeforeFrameFunc = "BeforeFrameFunc",
     FrameFunc = "FrameFunc",
+    AfterFrameFunc = "AfterFrameFunc",
     RenderFunc = "RenderFunc",
     FocusGain = "FocusGain",
     FocusLose = "FocusLose",
@@ -250,7 +255,9 @@ function M:Get(name, group)
             entry = e
         end
     end
-    if not entry then return nil end
+    if not entry then
+        return nil
+    end
     return setmetatable({ _e = entry }, Handle)
 end
 

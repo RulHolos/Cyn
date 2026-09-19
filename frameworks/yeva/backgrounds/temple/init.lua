@@ -1,7 +1,7 @@
-local object = require("core.engine.objects")
-local image = require("core.engine.resources.image")
-local camera3d = require("core.engine.viewport.camera3d")
-local view = require("core.engine.viewport.view")
+local object = require("cyn.engine.objects")
+local image = require("cyn.engine.resources.image")
+local camera3d = require("cyn.engine.viewport.camera3d")
+local view = require("cyn.engine.viewport.view")
 local background = require("yeva.backgrounds")
 
 ---@class yeva.background.temple : yeva.background

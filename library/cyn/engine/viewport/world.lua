@@ -48,7 +48,6 @@ local _WORLD_DEFAULT = {
 
 ---@class cyn.viewport.world
 local M = {
-    ---@private
     _default = {
         play = { x = 0, y = 0, w = 384 - 16, h = 448 - 16 },
         bound = 32,
@@ -56,7 +55,8 @@ local M = {
         mask = 0xFFFF,
     },
     ---@type cyn.viewport.world.data
-    data = build_world(_WORLD_DEFAULT)
+    ---@diagnostic disable-next-line: missing-fields
+    current = {},
 }
 
 local function copy_config(cfg)
@@ -77,10 +77,10 @@ local function copy_config(cfg)
     return copy
 end
 
----Rebuilds self.data from the current default and re-applies the bound.
+---Rebuilds self.current from the current default and re-applies the bound.
 function M:reset()
-    self.data = build_world(self._default)
-    lstg.SetBound(self.data.boundl, self.data.boundr, self.data.boundb, self.data.boundt)
+    self.current = build_world(self._default)
+    lstg.SetBound(self.current.boundl, self.current.boundr, self.current.boundb, self.current.boundt)
 end
 
 ---Resets the default world layout itself back to the module's built-in default, then applies it.
@@ -100,10 +100,15 @@ function M:apply(cfg)
 
     local w = build_world(cfg)
     for k, v in pairs(w) do
-        self.data[k] = v
+        self.current[k] = v
     end
 
-    lstg.SetBound(self.data.boundl, self.data.boundr, self.data.boundb, self.data.boundt)
+    lstg.SetBound(self.current.boundl, self.current.boundr, self.current.boundb, self.current.boundt)
+end
+
+function M:set_raw(data)
+    self.current = data
+    lstg.SetBound(data.boundl, data.boundr, data.boundb, data.boundt)
 end
 
 ---Changes the default world layout. Survives world resets.
@@ -121,7 +126,7 @@ end
 ---@return cyn.viewport.world.data
 function M:get()
     local copy = {}
-    for k, v in pairs(self.data) do
+    for k, v in pairs(self.current) do
         copy[k] = v
     end
     return copy

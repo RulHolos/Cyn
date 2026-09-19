@@ -70,7 +70,9 @@ function FrameFunc()
     return cyn.quit_flag]]
 
     frame_objects()
+    signals:Emit(signals.known_signals.BeforeFrameFunc)
     signals:Emit(signals.known_signals.FrameFunc)
+    signals:Emit(signals.known_signals.AfterFrameFunc)
 
     return QuitFlag
 end

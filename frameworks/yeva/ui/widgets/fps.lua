@@ -1,6 +1,9 @@
-local ttf = require("core.engine.resources.ttf")
+local ui_manager = require("yeva.ui")
+local view = require("cyn.engine.viewport.view")
+local screen = require("cyn.engine.viewport.screen")
+local ttf = require("cyn.engine.resources.ttf")
 
-local w = core.ui_manager.widget()
+local w = ui_manager.widget()
 
 function w:init()
     self.font = ttf.from_file("assets/fonts/score2.ttf", 5)
@@ -18,10 +21,10 @@ function w:frame()
 end
 
 function w:render()
-    core.view:set("ui")
+    view:set("ui")
 
     if self.fps then
-        self.fps:render(core.screen.width - 2, 2)
+        self.fps:render(screen.width - 2, 2)
     end
 end
 
@@ -36,4 +39,4 @@ function w:del()
     end
 end
 
-core.ui_manager:register_widget("fps_ui", w)
+ui_manager:register_widget("fps_ui", w)

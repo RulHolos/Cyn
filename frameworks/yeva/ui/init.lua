@@ -2,12 +2,14 @@
 -- UI Manager   --
 -- ============ --
 
-local resource_common = require("core.engine.resources.common")
+local resource_common = require("cyn.engine.resources.common")
+local signals = require("cyn.foundation.signals")
+local view = require("cyn.engine.viewport.view")
 
 ------------------------------------------------------------
 --- Widget base
 
----@class core.ui.widget
+---@class yeva.ui.widget
 ---@field name string
 ---@field x number
 ---@field y number
@@ -18,10 +20,10 @@ local resource_common = require("core.engine.resources.common")
 ---@field visible boolean If true, render skipped
 ---@field active boolean If true, frame skipped
 ---@field data table
----@field init fun(self: core.ui.widget)?
----@field frame fun(self: core.ui.widget)?
----@field render fun(self: core.ui.widget)?
----@field del fun(self: core.ui.widget)? Optional cleanup function called when the widget is removed.
+---@field init fun(self: yeva.ui.widget)?
+---@field frame fun(self: yeva.ui.widget)?
+---@field render fun(self: yeva.ui.widget)?
+---@field del fun(self: yeva.ui.widget)? Optional cleanup function called when the widget is removed.
 local _widget_base = {
     name = "",
     x = 0,
@@ -43,7 +45,7 @@ _widget_base.__index = _widget_base
 
 ---@param name string
 ---@param overrides table?
----@return core.ui.widget
+---@return yeva.ui.widget
 local function new_widget(name, overrides)
     local w = setmetatable({}, _widget_base)
     w.name = name
@@ -59,8 +61,8 @@ end
 ------------------------------------------------------------
 --- Sorted insertion (ascending order: lower order value = drawn first)
 
----@param list core.ui.widget[]
----@param w core.ui.widget
+---@param list yeva.ui.widget[]
+---@param w yeva.ui.widget
 local function _sortedInsert(list, w)
     local n = #list
     if n == 0 or w.order >= list[n].order then
@@ -79,9 +81,9 @@ end
 ------------------------------------------------------------
 --- UI Manager
 
----@class core.ui_manager
----@field _widgets core.ui.widget[]
----@field _by_name table<string, core.ui.widget>
+---@class yeva.ui_manager
+---@field _widgets yeva.ui.widget[]
+---@field _by_name table<string, yeva.ui.widget>
 ---@field _defs table<string, table>
 ---@field _def_order string[]
 local M = {
@@ -90,15 +92,14 @@ local M = {
     _defs = {},
     _def_order = {},
 }
-core.ui_manager = M
----@return core.ui.widget
+---@return yeva.ui.widget
 function M.widget()
     return new_widget("", nil)
 end
 
 ---@param name string
 ---@param overrides table?
----@return core.ui.widget
+---@return yeva.ui.widget
 function M:_instantiate_widget(name, overrides)
     assert(not self._by_name[name], ("UI Manager: a widget named '%s' already exists."):format(name))
 
@@ -154,14 +155,14 @@ end
 ---Use `register_widget` for stage-scoped widgets.
 ---@param name string Unique name for the widget.
 ---@param overrides table? Optional fields to override (x, y, rot, scale_h, scale_v, order, visible, active, data, init, frame, render).
----@return core.ui.widget
+---@return yeva.ui.widget
 function M:new_widget(name, overrides)
     assert(type(name) == "string" and name ~= "", "UI Manager: widget name must be a non-empty string.")
     return self:_instantiate_widget(name, overrides)
 end
 
 ---Removes a widget by name or by reference.
----@param widget core.ui.widget|string
+---@param widget yeva.ui.widget|string
 function M:remove(widget)
     local name = type(widget) == "string" and widget or widget.name
     if not self._by_name[name] then return end
@@ -178,17 +179,17 @@ end
 
 ---Returns a registered widget by name, or nil if not found.
 ---@param name string
----@return core.ui.widget?
+---@return yeva.ui.widget?
 function M:get(name)
     return self._by_name[name]
 end
 
 ---Changes the rendering order of a widget and re-sorts the list.
----@param widget core.ui.widget|string
+---@param widget yeva.ui.widget|string
 ---@param order integer
 function M:set_order(widget, order)
     local w = type(widget) == "string" and self._by_name[widget] or widget
-    ---@cast w core.ui.widget
+    ---@cast w yeva.ui.widget
     if not w then return end
     local list = self._widgets
     for i = 1, #list do
@@ -233,7 +234,7 @@ end
 
 ---Calls `render` on every visible widget, in render order (lower order drawn first).
 function M:render()
-    core.view:set("ui")
+    view:set("ui")
     local list = self._widgets
     for i = 1, #list do
         local w = list[i]
@@ -243,21 +244,14 @@ function M:render()
     end
 end
 
-core.signals:Register("ui_manager:frame", "FrameFunc", function() M:frame() end, 998)
-core.signals:Register("ui_manager:render", "RenderFunc", function() M:render() end, 998)
-core.signals:Register("ui_manager:stage_start", "stage:start", function()
+signals:Register("ui_manager:frame", signals.known_signals.FrameFunc, function() M:frame() end, 998)
+signals:Register("ui_manager:render", signals.known_signals.RenderFunc, function() M:render() end, 998)
+signals:Register("ui_manager:stage_start", "stage:start", function()
     M:clear()
     M:spawn_registered_widgets()
 end)
-core.signals:Register("ui_manager:stage_end", "stage:end", function()
+signals:Register("ui_manager:stage_end", "stage:end", function()
     M:clear()
 end)
 
-------------------------------------------------------------
---- Load widgets
-
-local patch = "core.lib.ui.widgets."
-require(patch .. "ui_bg")
-require(patch .. "score")
-require(patch .. "fps")
-require(patch .. "diff")
+return M

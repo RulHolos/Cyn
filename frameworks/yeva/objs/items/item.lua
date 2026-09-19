@@ -1,10 +1,12 @@
 local image_atlas = require("core.engine.resources.image_atlas")
 local audio_manager = require("core.engine.resources.audio_manager")
+local object = require("cyn.engine.objects")
+local world = require("cyn.engine.viewport.world")
 
----@class core.item : core.object
----@field target core.object Most likely always the player
----@field collect fun(self:core.item, other)? Called when the item is collected by the player. `other` is the player instance.
-local item = core.object.define()
+---@class yeva.objs.item : cyn.object
+---@field target cyn.object Most likely always the player
+---@field collect fun(self:yeva.objs.item, other)? Called when the item is collected by the player. `other` is the player instance.
+local item = object.define()
 
 ---Note: This item atlas is never deleted anywhere in code. See if this becomes an issue later. Probably not.
 local item_atlas = image_atlas.from_file("assets/general/item.png")
@@ -20,14 +22,14 @@ local item_img_up = item_atlas:add_image_group("item_up_", 64, 0, 32, 32, 2, 6)
 ---@param v number? Initial speed of the item. Default to 1.5.
 ---@param angle number? Initial angle of the item. Default to 90.
 function item:init(x, y, t, v, angle)
-    x = math.clamp(x, core.screen.world.l + 8, core.screen.world.r - 8)
+    x = math.clamp(x, world.current.l + 8, world.current.r - 8)
     self.x, self.y = x, y
     angle = angle or 90
     v = v or 1.5
     lstg.SetV(self, v, angle)
     self.v = v
-    self.group = core.object.group.ITEM
-    self.layer = core.object.layer.ITEMS
+    self.group = object.group.ITEM
+    self.layer = object.layer.ITEMS
     self.bound = false
     self.index = t
     self.attract = 0
@@ -53,7 +55,7 @@ function item:frame()
     else
         self.vy = math.max(self.dy - 0.03, -0.05)
     end
-    if self.y < -(core.screen.world.b) - core.screen.world.boundb then
+    if self.y < -(world.current.b) - world.current.boundb then
         lstg.Del(self)
     end
     if self.attract >= 8 then
@@ -62,20 +64,20 @@ function item:frame()
 end
 
 function item:render()
-    if self.y > core.screen.world.t then
-        item_img_up[self.index]:render(self.x, core.screen.world.t - 8)
+    if self.y > world.current.t then
+        item_img_up[self.index]:render(self.x, world.current.t - 8)
     else
         item_img[self.index]:render(self.x, self.y, self.rot)
     end
 end
 
----@param other core.object
+---@param other cyn.object
 function item:colli(other)
     if other == core.player.instance then
         if self.class.collect then
             self.class.collect(self, other)
         end
         lstg.Kill(self)
-        audio_manager.play_se("item00", 0.3, self.x / (core.world._default.play.w / 2))
+        audio_manager.play_se("item00", 0.3, self.x / (world._default.play.w / 2))
     end
 end

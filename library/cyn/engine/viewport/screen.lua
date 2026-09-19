@@ -19,10 +19,6 @@ local M = {
 
     halfW = 0,
     halfH = 0,
-
-    ---@type cyn.viewport.world.data
-    ---@diagnostic disable-next-line: missing-fields
-    world = {},
 }
 
 ---Set up the screen params. Call when the window is resized.
@@ -52,21 +48,21 @@ function M:setup(resetWorld)
     if resetWorld == true then
         if landscape then
             world:reset()
-            world_camera:reset()
         else
-            self.world = {
+            world:set_raw({
                 l = -192, r = 192, b = -224, t = 224,
                 boundl = -224, boundr = 224, boundb = -256, boundt = 256,
                 scrl = 6, scrr = 390, scrb = 16, scrt = 464,
                 pl = -192, pr = 192, pb = -224, pt = 224,
                 world = 0xFFFF,
-            }
-            lstg.SetBound(self.world.boundl, self.world.boundr, self.world.boundb, self.world.boundt)
-            world_camera:reset()
+            })
         end
+
+        world_camera:reset()
     end
 
     lstg.SetResolution(settings.graphics_system.width, settings.graphics_system.height)
+    lstg.ChangeVideoMode(settings.graphics_system.width, settings.graphics_system.height, settings.graphics_system.fullscreen and "fullscreen" or "windowed", settings.graphics_system.vsync)
 
     self.halfW = self.width / 2
     self.halfH = self.height / 2

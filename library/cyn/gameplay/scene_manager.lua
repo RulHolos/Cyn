@@ -107,13 +107,12 @@ function stage_group:new_stage(name)
         end
 
         stage.name = qualified_name
+        table.insert(self.stages, stage.name)
     else
         stage = new_stage_object(name)
         self:register_stage(stage)
         M.stages[stage.name] = stage
     end
-
-    table.insert(self.stages, stage.name)
 
     return stage
 end
@@ -263,7 +262,7 @@ end
 ---
 ---- **Orphan context**: you must have queued a destination first with `set_next` or `goto`.
 function M:switch()
-    userdata_manager:get().save()
+    userdata_manager.userdata.save()
 
     self:stop_current()
 
@@ -360,7 +359,10 @@ function M:load_stage(stage)
     self.current_stage = stage
     self.current_stage.timer = 0
     self.current_stage:init()
-    signals:Get("ui_manager:render", "RenderFunc"):SetEnabled(not self.current_stage.is_menu) --Only allow if the current stage is a game stage.
+    local ui_render_signal = signals:Get("ui_manager:render", signals.known_signals.RenderFunc)
+    if ui_render_signal then
+        ui_render_signal:SetEnabled(not self.current_stage.is_menu)
+    end --Only allow if the current stage is a game stage.
 
     signals:Emit("stage:start", self.current_stage)
 end

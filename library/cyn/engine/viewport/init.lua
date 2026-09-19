@@ -21,5 +21,9 @@ signals:Once("register_screen", signals.known_signals.GameInit, function()
     M.screen:setup(true)
     M.view:set("world")
 end, signals.HIGH_PRIORITY + 1)
+signals:Once("register_screen", signals.known_signals.FrameFunc, function() --GlazeWM compatibility
+    M.screen:setup(true)
+    M.view:set("world")
+end, signals.HIGH_PRIORITY * 3)
 
 return M

@@ -20,6 +20,6 @@ end)
 
 local signals = require("cyn.foundation.signals")
 
-signals:Register("ipc_start", "GameInit", function()
+signals:Register("ipc_start", signals.known_signals.GameInit, function()
     lstg.IPC.start("LuaSTGFlux")
 end)

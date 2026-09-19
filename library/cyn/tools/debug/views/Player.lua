@@ -20,7 +20,7 @@ function Player:setState(v) self.enabled = v end
 
 function Player:frame() end
 function Player:layout()
-    local player = cyn.player.instance
+    local player = nil --cyn.player.instance
     if player == nil then
         ImGui.Text("No player instance found.")
         return

@@ -17,6 +17,8 @@ This does NOT include a preset by default. It's a "bring your own content" frame
 Yeva Framework provides a base for making your game, like players, items, enemies, stages, ...
 But, unlike THlib which expects a LOT of things to be structed a very specific way, Yeva Framework doesn't expect anything. You use what you want.
 This does mean that Yeva is much harder to use though, as you have to tie everything together yourself.
+
+Note on Yeva's classes names: They're equivalent to the folder/file architecture.
 ]]
 
 local userdata = require("yeva.db.userdata")

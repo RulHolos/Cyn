@@ -50,7 +50,7 @@ function M:set(mode)
     self._mode = mode
 
     local sc = screen
-    local w = world.data
+    local w = world.current
 
     if mode == "world" then
         local l, r, b, t = world_camera:get_transformed_bounds()
@@ -102,7 +102,7 @@ end
 ---@param color lstg.Color
 function M:clear(color)
     local sc = screen
-    local w = world.data
+    local w = world.current
     local mode = self._mode
 
     if mode == "3d" then

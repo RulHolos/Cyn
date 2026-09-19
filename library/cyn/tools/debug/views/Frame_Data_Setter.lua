@@ -1,3 +1,5 @@
+local object = require("cyn.engine.objects")
+
 ---@diagnostic disable: need-check-nil, param-type-mismatch
 local imgui_exists, imgui = pcall(require, "imgui")
 
@@ -13,14 +15,14 @@ local function ensure_layer_list()
     if layer_keys then return end
     layer_keys = {}
     layer_values = {}
-    for k in pairs(cyn.object.layer) do
+    for k in pairs(object.layer) do
         table.insert(layer_keys, k)
     end
     table.sort(layer_keys, function(a, b)
-        return cyn.object.layer[a] < cyn.object.layer[b]
+        return object.layer[a] < object.layer[b]
     end)
     for i, k in ipairs(layer_keys) do
-        layer_values[i] = cyn.object.layer[k]
+        layer_values[i] = object.layer[k]
     end
 end
 
@@ -64,7 +66,7 @@ end
 
 function Frame_Data_Setter:layout_frame_groups()
     ImGui.Text("Frame Groups")
-    for k, v in pairs(cyn.object.group) do
+    for k, v in pairs(object.group) do
         local checked = group_list_contains(v)
         local changed, new_val = ImGui.Checkbox(("%s (%d)"):format(k, v), checked)
         if changed then

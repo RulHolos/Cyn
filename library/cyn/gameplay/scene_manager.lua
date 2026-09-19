@@ -1,14 +1,28 @@
+local userdata_manager = require("cyn.foundation.userdata_manager")
+local signals = require("cyn.foundation.signals")
+local task = require("cyn.foundation.task")
+
 -- ============= --
 -- Scene Manager --
 -- ============= --
 
----@alias StageType "stage"|"group"
+---@alias cyn.stage_type "stage"|"group"
+
+---@class cyn.stage_manager
+---@field stages table<string, cyn.stage>
+---@field groups table<string, cyn.stage_group>
+---@field current_stage cyn.stage?
+---@field current_group cyn.stage_group?
+---@field next cyn.stage|cyn.stage_group|nil
+---@field menu_name cyn.stage?
+---@field entry_name cyn.stage?
+local M --Forward-declared so stage_group's methods (defined below, before M is filled in) can close over the real upvalue instead of the global.
 
 ------------------------------------------------------------
 --- Stage
 
 ---@class cyn.stage
----@field type StageType
+---@field type cyn.stage_type
 ---@field name string
 ---@field is_menu boolean
 ---@field is_entry boolean
@@ -34,15 +48,19 @@ local _s = {
 ---@return cyn.stage
 local function new_stage_object(name, overrides)
     local s = {}
+
     for k, v in pairs(_s) do
         s[k] = v
     end
+
     s.name = name
+
     if overrides then
         for k, v in pairs(overrides) do
             s[k] = v
         end
     end
+
     return s
 end
 
@@ -50,7 +68,7 @@ end
 --- Stage Group
 
 ---@class cyn.stage_group
----@field type StageType
+---@field type cyn.stage_type
 ---@field name string
 ---@field stages string[] Ordered list of fully-qualified stage names.
 ---@field current_index integer
@@ -71,22 +89,32 @@ local stage_group = {
 function stage_group:register_stage(stage)
     stage.name = ("%s@%s"):format(stage.name, self.name)
     table.insert(self.stages, stage.name)
+
     return stage
 end
 
 function stage_group:new_stage(name)
     local qualified_name = ("%s@%s"):format(name, self.name)
-    local stage = cyn.stage_manager.stages[qualified_name]
+    local stage = M.stages[qualified_name]
+
     if stage then
-        for k in pairs(stage) do stage[k] = nil end
-        for k, v in pairs(_s) do stage[k] = v end
+        for k in pairs(stage) do
+            stage[k] = nil
+        end
+
+        for k, v in pairs(_s) do
+            stage[k] = v
+        end
+
         stage.name = qualified_name
     else
         stage = new_stage_object(name)
         self:register_stage(stage)
-        cyn.stage_manager.stages[stage.name] = stage
+        M.stages[stage.name] = stage
     end
+
     table.insert(self.stages, stage.name)
+
     return stage
 end
 
@@ -99,21 +127,18 @@ end
 ---@return string?
 function stage_group:advance()
     local name = self.stages[self.current_index]
+
     if name then
         self.current_index = self.current_index + 1
     end
+
     return name
 end
 
----@class cyn.stage_manager
----@field stages table<string, cyn.stage>
----@field groups table<string, cyn.stage_group>
----@field current_stage cyn.stage?
----@field current_group cyn.stage_group?
----@field next cyn.stage|cyn.stage_group|nil
----@field menu_name cyn.stage?
----@field entry_name cyn.stage?
-local M = {
+------------------------------------------------------------
+--- Stage Manager
+
+M = {
     stages = {},
     groups = {},
     current_stage = nil,
@@ -122,7 +147,6 @@ local M = {
     menu_name = nil,
     entry_name = nil,
 }
-cyn.stage_manager = M
 
 ---Creates and registers a new orphan stage (menu or entry point).
 ---
@@ -137,13 +161,16 @@ function M:new_stage(name, opts)
     assert(type(name) == "string" and name ~= "", "Stage name must be a non-empty string.")
 
     local stage = self.stages[name]
+
     if stage then
         for k in pairs(stage) do
             stage[k] = nil
         end
+
         for k, v in pairs(_s) do
             stage[k] = v
         end
+
         stage.name = name
     else
         stage = new_stage_object(name)
@@ -157,6 +184,7 @@ function M:new_stage(name, opts)
         if self.entry_name then
             error(("StageManager: entry point already set to '%s'."):format(self.entry_name))
         end
+
         self.entry_name = name
         self.next = stage -- queued automatically.
     end
@@ -165,6 +193,7 @@ function M:new_stage(name, opts)
         if self.menu_name then
             error(("StageManager: menu already set to '%s'."):format(self.menu_name))
         end
+
         self.menu_name = name
     end
 
@@ -190,14 +219,17 @@ function M:new_group(name, opts)
     end
 
     local group = {}
+
     for k, v in pairs(stage_group) do
         group[k] = v
     end
+
     group.name = name
     group.stages = {}
     group.after = opts.after or nil
 
     self.groups[name] = group
+
     return group
 end
 
@@ -208,9 +240,11 @@ end
 ---@param name string Name of an existing stage or group.
 function M:set_next(name)
     local target = self.stages[name] or self.groups[name]
+
     if not target then
         error(("StageManager: no stage or group named '%s' found."):format(name))
     end
+
     self.next = target
 end
 
@@ -229,15 +263,17 @@ end
 ---
 ---- **Orphan context**: you must have queued a destination first with `set_next` or `goto`.
 function M:switch()
-    cyn.userdata.flush_scyndata()
+    userdata_manager:get().save()
 
     self:stop_current()
 
     -- Group
     if self.current_group then
         local next_name = self.current_group:advance()
+
         if next_name then
             self:load_stage(self.stages[next_name])
+
             return
         end
 
@@ -250,11 +286,13 @@ function M:switch()
         end
 
         local exit_target = self.groups[exit_name] or self.stages[exit_name]
+
         if not exit_target then
             error(("StageManager: no stage or group named '%s' found."):format(exit_name))
         end
 
         self:load_target(exit_target)
+
         return
     end
 
@@ -281,13 +319,17 @@ function M:load_target(target)
         ---@cast target cyn.stage_group
         self.current_group = target
         local first_name = target:advance()
+
         if not first_name then
             error(("StageManager: stage group '%s' is empty."):format(target.name))
         end
+
         local first_stage = self.stages[first_name]
+
         if not first_stage then
             error(("StageManager: no stage named '%s' found."):format(first_name))
         end
+
         self:load_stage(first_stage)
     else
         error("StageManager: invalid target type.")
@@ -303,7 +345,7 @@ function M:stop_current()
     self.current_stage:del()
     lstg.ResetPool()
     lstg.RemoveResource("stage")
-    cyn.signals:Emit("stage:end", self.current_stage)
+    signals:Emit("stage:end", self.current_stage)
 
     self.current_stage = nil
 end
@@ -318,9 +360,9 @@ function M:load_stage(stage)
     self.current_stage = stage
     self.current_stage.timer = 0
     self.current_stage:init()
-    cyn.signals:Get("ui_manager:render", "RenderFunc"):SetEnabled(not self.current_stage.is_menu) --Only allow if the current stage is a game stage.
+    signals:Get("ui_manager:render", "RenderFunc"):SetEnabled(not self.current_stage.is_menu) --Only allow if the current stage is a game stage.
 
-    cyn.signals:Emit("stage:start", self.current_stage)
+    signals:Emit("stage:start", self.current_stage)
 end
 
 ---@private
@@ -328,7 +370,8 @@ function M:_frame()
     if not self.current_stage then
         return
     end
-    cyn.task.Do(self.current_stage)
+
+    task.Do(self.current_stage)
     self.current_stage:frame()
     self.current_stage.timer = self.current_stage.timer + 1
 end
@@ -338,17 +381,19 @@ function M:_render()
     if not self.current_stage then
         return
     end
+
     self.current_stage:render()
 end
 
-cyn.signals:Register("stage_manager:init", "GameInit", function()
+signals:Register("stage_manager:init", signals.known_signals.GameInit, function()
     if not M.entry_name and not M.next then
         error("StageManager: no entry point defined. Please create a stage with the 'entry_point' flag or queue a stage/group with set_next.")
     end
+
     M:switch()
 end)
 
-cyn.signals:Register("stage_manager:frame", "FrameFunc", function() M:_frame() end, 999)
-cyn.signals:Register("stage_manager:render", "RenderFunc", function() M:_render() end, 999)
+signals:Register("stage_manager:frame", signals.known_signals.FrameFunc, function() M:_frame() end, 999)
+signals:Register("stage_manager:render", signals.known_signals.RenderFunc, function() M:_render() end, 999)
 
 return M

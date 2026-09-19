@@ -1,4 +1,5 @@
 local screen = require("cyn.engine.viewport.screen")
+local settings_manager = require("cyn.foundation.settings_manager")
 
 ---@class cyn.viewport.coords
 local M = {}
@@ -29,7 +30,7 @@ end
 function M:world_to_screen(x, y)
     local sc = screen
     local w = sc.world
-    local settings = cyn.userdata.settings
+    local settings = settings_manager:get()
     local sx, sy
 
     if settings.graphics_system.width > settings.graphics_system.height then

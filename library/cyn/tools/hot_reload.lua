@@ -1,3 +1,9 @@
+local signals = require("cyn.foundation.signals")
+local object = require("cyn.engine.objects")
+local cdf = require("cyn.presentation.cdf")
+
+local FileSystemWatcher = require("lstg.FileSystemWatcher")
+
 ---Watches all mounted roots and react to file changes.
 ---
 ---.lua files that were required are re-loading using DoFile. Resulted tables are merged into the original table object returned by require.
@@ -24,9 +30,6 @@ local M = {
         "%.git/",
     },
 }
-cyn.hot_reload = M
-
-local FileSystemWatcher = require("lstg.FileSystemWatcher")
 
 local ACTION_NAMES = {
     [1] = "added",
@@ -95,7 +98,7 @@ local function reload_lua_module(modname)
         setmetatable(old, getmetatable(result))
 
         if old.is_class then
-            cyn.object.resync(old)
+            object.resync(old)
         end
 
         package.loaded[modname] = old
@@ -114,7 +117,7 @@ local function dispatch(path, action)
         elseif modname then
             lstg.Log(LOG.WARN, string.format("[hot_reload] '%s' was not loaded via require, cannot hot-reload it", modname))
         elseif path:match("%.cdf$") then
-            cyn.cdf.invalidate((path:gsub("%.cdf$", "")))
+            cdf.invalidate((path:gsub("%.cdf$", "")))
         end
     end
 
@@ -192,4 +195,6 @@ end
 
 start()
 
-cyn.signals:Register("Hot Reload", "FrameFunc", M.poll, 1e9)
+signals:Register("hot_reload", "FrameFunc", M.poll, signals.HIGH_PRIORITY * 2)
+
+return M

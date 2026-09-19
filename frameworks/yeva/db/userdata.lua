@@ -133,6 +133,8 @@ function M.init_scoredata()
     end
 end
 
+M.load = M.init_scoredata
+
 ---Flushes all dirty data from all tables to the database.
 function M.flush_scoredata()
     if not db then
@@ -191,6 +193,8 @@ function M.flush_scoredata()
         lstg.Log(3, string.format("Failed to flush scoredata: %s (code: %s)", err, code))
     end
 end
+
+M.save = M.flush_scoredata
 
 ---Closes the database.
 function M.close_scoredata()

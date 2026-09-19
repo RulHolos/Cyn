@@ -1,4 +1,6 @@
 ---@class cyn.IUserdata
+---@field load fun()
+---@field save fun()
 ---@field create_directories fun() Creates necessary directories for the userdata system.
 ---@field get_root_directory fun():string
 ---@field get_snapshot_directory fun():string

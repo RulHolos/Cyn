@@ -169,8 +169,8 @@ end
 ---- All views are automatically loaded here at startup only.               ----
 ---- If you wish to add more files at runtime, use `ImGuiManager:addView()` ----
 ---TODO: Fix the path
-local patch = "data.cyn.lib.debug.views."
-local path = "data/cyn/lib/debug/views/"
+local patch = "library.cyn.tools.debug.views."
+local path = "library/cyn/tools/debug/views/"
 
 local patches = lstg.FileManager.EnumFiles(path, "lua");
 for _, v in ipairs(patches) do

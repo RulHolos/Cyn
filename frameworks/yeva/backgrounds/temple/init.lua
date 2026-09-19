@@ -2,10 +2,11 @@ local object = require("core.engine.objects")
 local image = require("core.engine.resources.image")
 local camera3d = require("core.engine.viewport.camera3d")
 local view = require("core.engine.viewport.view")
+local background = require("yeva.backgrounds")
 
----@class core.background.temple : core.background
-local M = object.define(core.background)
-core.background.temple = M
+---@class yeva.background.temple : yeva.background
+local M = object.define(background)
+background.temple = M
 
 ---@param img resource.image
 ---@param x number
@@ -35,11 +36,11 @@ local function draw_pillar(img, x, z, y1, y2, r)
 end
 
 function M:init()
-    core.background.init(self, false)
+    background.init(self, false)
 
-    self.res_road = image.from_file('core/lib/background/temple/road.png')
-    self.res_ground = image.from_file('core/lib/background/temple/ground.png')
-    self.res_pillar = image.from_file('core/lib/background/temple/pillar.png')
+    self.res_road = image.from_file('yeva/backgrounds/temple/road.png')
+    self.res_ground = image.from_file('yeva/backgrounds/temple/ground.png')
+    self.res_pillar = image.from_file('yeva/backgrounds/temple/pillar.png')
 
     camera3d:set({
         eye = { x = 0, y = 2.5, z = -4 },

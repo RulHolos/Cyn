@@ -11,7 +11,7 @@ end)
 
 ---Switches to another stage
 lstg.IPC.register("stage_goto", function(name)
-    cyn.stage_manager:goto(name)
+    --cyn.stage_manager:goto(name)
 end)
 
 lstg.IPC.register("quit", function()

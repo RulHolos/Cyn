@@ -1,5 +1,5 @@
-if not package.loaded["frameworks.yeva.db.userdata"] then
-    error("`frameworks.yeva.db.userdata` must be loaded before `frameworks.yeva.db.settings`")
+if not package.loaded["yeva.db.userdata"] then
+    error("`yeva.db.userdata` must be loaded before `yeva.db.settings`")
 end
 
 local keyboard = lstg.Input.Keyboard

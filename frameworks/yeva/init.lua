@@ -19,8 +19,8 @@ But, unlike THlib which expects a LOT of things to be structed a very specific w
 This does mean that Yeva is much harder to use though, as you have to tie everything together yourself.
 ]]
 
-local userdata = require("frameworks.yeva.db.userdata")
-require("frameworks.yeva.db.settings")
+local userdata = require("yeva.db.userdata")
+require("yeva.db.settings")
 userdata.init_scoredata()
 
 lstg.Log(LOG.INFO, "Cyn initialized")

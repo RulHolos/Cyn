@@ -33,9 +33,14 @@
     "file_system": {
         "resources": [
             {
-                "name": "data",
+                "name": "library",
                 "type": "directory",
-                "path": "data/"
+                "path": "library/"
+            },
+            {
+                "name": "frameworks",
+                "type": "directory",
+                "path": "frameworks/"
             },
             {
                 "name": "assets",

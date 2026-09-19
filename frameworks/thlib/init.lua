@@ -7,7 +7,7 @@ It is NOT a direct port of thlib but more like a re-imagination with modularity 
 If you use this package, the "Core" module will be populated with the "Full" library preset by default.
 ]]
 
-Core = require("core.presets.full")
+Cyn = require("cyn.presets.full")
 
 --TODO: Create other modules
 

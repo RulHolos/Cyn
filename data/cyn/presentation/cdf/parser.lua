@@ -1,4 +1,4 @@
----@class core.cdf.parser
+---@class cyn.cdf.parser
 local parser = {}
 
 --#region paths

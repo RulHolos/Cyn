@@ -10,14 +10,14 @@ end
 
 -------------------------------------------------------------------
 
----@class core.plugins
-core.plugins = {}
+---@class cyn.plugins
+local M = {}
 
 local PLUGINS_PATH = "plugins/"
 local ENTRY_POINT_SCRIPT = "init.lua"
 
----@return core.plugins.config.entry[]
-function core.plugins.ListPlugins()
+---@return cyn.plugins.config.entry[]
+function M.ListPlugins()
     local list = lstg.FileManager.EnumFiles(PLUGINS_PATH)
     local result = {}
     local seen_names = {}
@@ -60,9 +60,9 @@ function core.plugins.ListPlugins()
     return result
 end
 
----@param entry core.plugins.config.entry
+---@param entry cyn.plugins.config.entry
 ---@return boolean
-function core.plugins.LoadPlugin(entry)
+function M.LoadPlugin(entry)
     local ok, err
 
     if entry.directory_mode then
@@ -85,7 +85,7 @@ end
 
 local CONFIG_FILE = "plugins.json"
 
----@class core.plugins.config.entry
+---@class cyn.plugins.config.entry
 local _ = {
     name = "",
     path = "",
@@ -97,8 +97,8 @@ local function checkDirectory()
     lstg.FileManager.CreateDirectory(PLUGINS_PATH)
 end
 
----@return core.plugins.config.entry
-function core.plugins.LoadConfig()
+---@return cyn.plugins.config.entry
+function M.LoadConfig()
     checkDirectory()
 
     local f = io.open(PLUGINS_PATH .. CONFIG_FILE, "rb")
@@ -123,8 +123,8 @@ function core.plugins.LoadConfig()
     return val
 end
 
----@param cfg core.plugins.config.entry[]
-function core.plugins.SaveConfig(cfg)
+---@param cfg cyn.plugins.config.entry[]
+function M.SaveConfig(cfg)
     checkDirectory()
 
     local f, msg = io.open(PLUGINS_PATH .. CONFIG_FILE, "wb")
@@ -136,10 +136,10 @@ function core.plugins.SaveConfig(cfg)
     f:close()
 end
 
----@param cfg core.plugins.config.entry[]
----@return core.plugins.config.entry[]
-function core.plugins.FreshConfig(cfg)
-    local new_cfg = core.plugins.ListPlugins()
+---@param cfg cyn.plugins.config.entry[]
+---@return cyn.plugins.config.entry[]
+function M.FreshConfig(cfg)
+    local new_cfg = M.ListPlugins()
 
     if type(cfg) == "table" then
         local old_by_key = {}
@@ -162,14 +162,14 @@ function core.plugins.FreshConfig(cfg)
     return new_cfg
 end
 
----@param cfg core.plugins.config.entry[]
-function core.plugins.LoadPluginsByConfig(cfg)
+---@param cfg cyn.plugins.config.entry[]
+function M.LoadPluginsByConfig(cfg)
     local loaded_count = 0
     local failed_count = 0
 
     for _, v in ipairs(cfg) do
         if v.enable then
-            if core.plugins.LoadPlugin(v) then
+            if M.LoadPlugin(v) then
                 loaded_count = loaded_count + 1
             else
                 failed_count = failed_count + 1
@@ -182,8 +182,8 @@ function core.plugins.LoadPluginsByConfig(cfg)
     end
 end
 
----@param cfg core.plugins.config.entry[]
-function core.plugins.PrintConfig(cfg)
+---@param cfg cyn.plugins.config.entry[]
+function M.PrintConfig(cfg)
     lstg.Print("========== Plugins ==========")
     for i, v in ipairs(cfg) do
         lstg.Print(tostring(i), v.name, v.path, v.directory_mode)
@@ -193,23 +193,23 @@ end
 
 -------------------------------------------------------------------
 
-function core.plugins.LoadPlugins()
-    local config_ok, cfg = pcall(core.plugins.LoadConfig)
+function M.LoadPlugins()
+    local config_ok, cfg = pcall(M.LoadConfig)
     if not config_ok then
         lstg.Log(LOG.ERROR, string.format("failed to load plugin config: %s", tostring(cfg)))
         cfg = {}
     end
 
-    local scan_ok, new_cfg = pcall(core.plugins.FreshConfig, cfg)
+    local scan_ok, new_cfg = pcall(M.FreshConfig, cfg)
     if not scan_ok then
         lstg.Log(LOG.ERROR, string.format("failed to enumerate plugins: %s", tostring(new_cfg)))
         return
     end
 
-    local save_ok, save_err = pcall(core.plugins.SaveConfig, new_cfg)
+    local save_ok, save_err = pcall(M.SaveConfig, new_cfg)
     if not save_ok then
         lstg.Log(LOG.ERROR, string.format("failed to save plugin config: %s", tostring(save_err)))
     end
 
-    core.plugins.LoadPluginsByConfig(new_cfg)
+    M.LoadPluginsByConfig(new_cfg)
 end

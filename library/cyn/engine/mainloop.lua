@@ -14,6 +14,7 @@ function GameInit()
     objects.init_all()
 
     signals:Emit(signals.known_signals.GameInit)
+    signals:warn_GameInit()
 end
 
 function GameExit()

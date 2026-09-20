@@ -21,6 +21,8 @@ This does mean that Yeva is much harder to use though, as you have to tie everyt
 Note on Yeva's classes names: They're equivalent to the folder/file architecture.
 ]]
 
+lstg.SetTitle("Yeva Framework v0.10a")
+
 local userdata = require("yeva.db.userdata")
 require("yeva.db.settings")
 userdata.init_scoredata()

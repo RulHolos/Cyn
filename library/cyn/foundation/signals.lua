@@ -116,6 +116,7 @@ end
 local M = {
     _groups = {},
     _individual = {},
+    _game_init_emitted = false,
 
     LOW_PRIORITY = -1000,
     MEDIUM_PRIORITY = 0,
@@ -158,6 +159,7 @@ function M:Register(name, group, callback, order, owner)
         dead = false,
         enabled = true,
         _g = nil, --back-ref of group
+        _is_once = false,
     }
 
     if entryBox then
@@ -190,6 +192,10 @@ end
 ---@param signal string
 ---@param ... unknown
 function M:Emit(signal, ...)
+    if signal == "GameInit" then
+        self._game_init_emitted = true
+    end
+
     local ind = self._individual[signal]
     if ind then
         if not ind.dead and ind.enabled then
@@ -232,6 +238,11 @@ function M:Once(name, group, callback, order)
         handle = nil
         callback(...)
     end, order)
+
+    if handle and handle._e then
+        handle._e._is_once = true
+    end
+
     return handle
 end
 
@@ -342,6 +353,27 @@ end
 function M:SetGroupEnabled(group, enabled)
     local g = self._groups[group]
     if g then g.enabled = enabled end
+end
+
+---Outputs warning messages for signals that were registered on GameInit but never will be emitted.
+---
+---Most likely, it indicates that they were registered too late.
+---
+---This only works for events registered with "once".
+function M:warn_GameInit()
+    if not self._game_init_emitted then
+        return
+    end
+
+    local g = self._groups["GameInit"]
+    if g then
+        for i = 1, #g.list do
+            local e = g.list[i]
+            if e._is_once and not e.dead then
+                lstg.Log(LOG.WARN, string.format("Signal '%s' in group 'GameInit' was registered after GameInit and will never be emitted.", e.name))
+            end
+        end
+    end
 end
 
 return M

@@ -1,5 +1,10 @@
 local object = require("cyn.engine.objects")
 
+lstg.IPC.register("list_bullets", function()
+    --TODO
+    return {}
+end)
+
 ---Objects have two mode: Legacy and New.
 ---- Legacy is the THlib way (multiple colors without blendmodes)
 ---- New mode uses blendmodes for more advanced visual effects.

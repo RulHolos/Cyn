@@ -50,8 +50,6 @@ function w:init()
     set_common_text(self.score_value, 255, 255, 255)
     self.score_value:setAlignment("right", "top")
 
-    userdata.player.score = 50000
-
     --Populate text on first frame forced.
     self:frame()
 end

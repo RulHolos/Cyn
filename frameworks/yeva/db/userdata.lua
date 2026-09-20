@@ -88,6 +88,11 @@ M.scoredata = setmetatable({}, {
     end
 })
 
+---Custom game state data that will not be stored in the database.
+---
+---Made for things like lives, bombs, power, temp score, ...
+M.gamestate = {}
+
 ---Initializes the database and loads all tables into memory.
 function M.init_scoredata()
     local path = M.get_named_database()

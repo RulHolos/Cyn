@@ -7,6 +7,7 @@
 ---@field get_replay_directory fun():string
 ---@field get_named_database fun():string Returns a different path based on the name of the currently running game.
 ---@field scoredata table Data containing player data informations. Not settings.
+---@field gamestate table Custom game state data that will not be stored in the database.
 
 ---Represents a proxy manager for userdata access.
 ---@class cyn.userdata_manager

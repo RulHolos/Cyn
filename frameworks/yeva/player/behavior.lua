@@ -1,6 +1,6 @@
----@class core.player.behavior
+---@class yeva.player.behavior
 ---@field name string
----@field player core.player
+---@field player yeva.player
 ---@field init fun(self, ...) Called when the behavior is attached to a player.
 ---@field frame fun(self) Called every frame.
 ---@field render fun(self) Called every render frame.
@@ -8,15 +8,14 @@
 ---@field del fun(self) Called when the behavior is detached from the player.
 ---@field debug fun(self) Called when the player debug is rendered in ImGui.
 local Behavior = {}
-Behavior.__index = Behavior
 
 local noop = function(self, ...) end
 
 ---Defines a new behavior type.
 ---@param name string The unique name for this behavior.
----@return core.player.behavior
+---@return yeva.player.behavior
 function Behavior.define(name)
-    ---@class core.player.behavior
+    ---@class yeva.player.behavior
     local b = setmetatable({}, { __index = Behavior })
     b.__index = b
     b.name = name
@@ -29,12 +28,12 @@ function Behavior.define(name)
     return b
 end
 
----@generic T : core.player.behavior
+---@generic T : yeva.player.behavior
 ---@param self T
----@param player core.player
+---@param player yeva.player
 ---@return T
 function Behavior:new(player, ...)
-    ---@type core.player.behavior
+    ---@type yeva.player.behavior
     local instance = setmetatable({}, self)
     instance.player = player
     instance:init(...)

@@ -1,16 +1,18 @@
----@class core.player.behavior.animation.imgs.named
+local player = require("yeva.player")
+
+---@class yeva.player.behavior.animation.imgs.named
 ---@field normal resource.image[] Neutral cycling frames.
 ---@field left resource.image[] & { ani: integer? } Left frames: [1..n-ani] transition, [n-ani+1..n] max-lean loop.
 ---@field right resource.image[] & { ani: integer? } Right frames: [1..n-ani] transition, [n-ani+1..n] max-lean loop.
 
----@class core.player.behavior.animation : core.player.behavior
-local M = core.player.behavior.define("animation")
+---@class yeva.player.behavior.animation : yeva.player.behavior
+local M = player.behavior.define("animation")
 
 function M:init()
     self.blend = ""
     ---@type resource.image?
     self.img = nil
-    ---@type resource.image[] | core.player.behavior.animation.imgs.named
+    ---@type resource.image[] | yeva.player.behavior.animation.imgs.named
     self.imgs = {}
     self.a, self.r, self.g, self.b = 255, 255, 255, 255
     self.ani_interval = 16
@@ -18,7 +20,7 @@ function M:init()
     self.max_right = 6
     self.lean = 0
 
-    self.move = self.player:get_behavior(core.player.b_move)
+    self.move = self.player:get_behavior("move")
 
     assert(self.move ~= nil, "A move behavior must be attached for this stock behavior to work.")
 end

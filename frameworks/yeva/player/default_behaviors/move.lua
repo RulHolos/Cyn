@@ -1,5 +1,9 @@
----@class core.player.behavior.move : core.player.behavior
-local M = core.player.behavior.define("move")
+local player = require("yeva.player")
+local input = require("cyn.engine.input")
+local world = require("cyn.engine.viewport.world")
+
+---@class cyn.player.behavior.move : yeva.player.behavior
+local M = player.behavior.define("move")
 
 function M:init()
     self.speed = 4.5
@@ -11,22 +15,22 @@ end
 function M:frame()
     local is_focus = false
     local dx, dy = 0, 0
-    if core.input:is_down("Focus") then
+    if input:is_down("focus") then
         is_focus = true
     end
 
     local speed = is_focus and self.focus_speed or self.speed
 
-    if core.input:is_down("Up") then
+    if input:is_down("up") then
         dy = dy + 1
     end
-    if core.input:is_down("Down") then
+    if input:is_down("down") then
         dy = dy - 1
     end
-    if core.input:is_down("Left") then
+    if input:is_down("left") then
         dx = dx - 1
     end
-    if core.input:is_down("Right") then
+    if input:is_down("right") then
         dx = dx + 1
     end
 
@@ -40,8 +44,8 @@ function M:frame()
     self.player.x = self.player.x + dx
     self.player.y = self.player.y + dy
     if self.keep_player_in_bounds then
-        self.player.x = math.max(math.min(self.player.x, core.screen.world.pr), core.screen.world.pl)
-        self.player.y = math.max(math.min(self.player.y, core.screen.world.pt), core.screen.world.pb)
+        self.player.x = math.max(math.min(self.player.x, world.current.pr), world.current.pl)
+        self.player.y = math.max(math.min(self.player.y, world.current.pt), world.current.pb)
     end
 end
 

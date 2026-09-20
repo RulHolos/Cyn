@@ -2,6 +2,7 @@ local image_atlas = require("core.engine.resources.image_atlas")
 local audio_manager = require("core.engine.resources.audio_manager")
 local object = require("cyn.engine.objects")
 local world = require("cyn.engine.viewport.world")
+local player = require("yeva.player")
 
 ---@class yeva.objs.item : cyn.object
 ---@field target cyn.object Most likely always the player
@@ -73,7 +74,7 @@ end
 
 ---@param other cyn.object
 function item:colli(other)
-    if other == core.player.instance then
+    if other == player.instance then
         if self.class.collect then
             self.class.collect(self, other)
         end

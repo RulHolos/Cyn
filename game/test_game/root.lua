@@ -8,7 +8,7 @@ require("yeva.ui")
 require("yeva.ui.widgets.ui_bg")
 require("yeva.ui.widgets.diff")
 require("yeva.ui.widgets.fps")
---require("yeva.ui.widgets.score")
+require("yeva.ui.widgets.score")
 
 --#endregion
 

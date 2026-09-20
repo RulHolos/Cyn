@@ -1,1 +1,0 @@
-require("core.lib.menu.menu_panel")

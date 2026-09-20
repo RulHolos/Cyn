@@ -1,5 +1,6 @@
 local signals = require("cyn.foundation.signals")
 local settings = require("cyn.foundation.settings_manager")
+local screen = require("cyn.engine.viewport.screen")
 local steam_exists, steam = pcall(require, "steam")
 local keyboard = lstg.Input.Keyboard
 local mouse = lstg.Input.Mouse
@@ -18,9 +19,19 @@ local M = {}
 ---@type table<string, boolean>
 local keyState = {}
 ---@type table<string, boolean>
+local mouseState = {}
+---@type table<string, boolean>
 local keyStatePrev = {}
+---@type table<string, boolean>
+local mouseStatePrev = {}
 ---@type table<string, integer>
 local keyDirectionTimer = {}
+
+local inputMouse = {
+    Left = 1,
+    Middle = 4,
+    Right = 2,
+}
 
 local DIRECTION_KEYS = { "Up", "Down", "Left", "Right" }
 
@@ -33,6 +44,16 @@ function M:refresh()
 
         if keyStatePrev[action] ~= is_down then
             signals:Emit("KeyStateChanged", action, is_down)
+        end
+    end
+
+    for action, keycode in pairs(inputMouse) do
+        local is_down = mouse.GetKeyState(keycode)
+        mouseStatePrev[action] = mouseState[action] or false
+        mouseState[action] = is_down
+
+        if mouseStatePrev[action] ~= is_down then
+            signals:Emit("MouseStateChanged", action, is_down)
         end
     end
 
@@ -73,6 +94,12 @@ function M:get_direction_timer(dir)
     return keyDirectionTimer[dir] or 0
 end
 
+---@param key "Left"|"Middle"|"Right"
+---@return boolean is_pressed
+function M:mouse_is_pressed(key)
+    return mouseState[key] and (not mouseStatePrev[key]) or false
+end
+
 ---Converts a key action to a readable key name (e.g "Z" for Shoot).
 ---@param code number Key code to convert
 ---@return string key_name Human-readable key name
@@ -89,6 +116,26 @@ function M:key_to_name(code)
         end
     end
     return ("KEY %d"):format(code)
+end
+
+---Returns the mouse position normalized to the current viewport ([0, screen.width], [0, screen.height])
+---@return number x, number y Coordinates in UI space
+---@return number norm_x, number norm_y Normalized viewport position [0, 1]
+function M:get_normalized_mouse_position()
+    local mx, my = lstg.GetMousePosition()
+
+    local vp_l = screen.dx
+    local vp_r = screen.width * screen.scale + screen.dx
+    local vp_b = screen.dy
+    local vp_t = screen.height * screen.scale + screen.dy
+
+    local norm_x = (mx - vp_l) / (vp_r - vp_l)
+    local norm_y = (my - vp_b) / (vp_t - vp_b)
+
+    local ui_x = norm_x * screen.width
+    local ui_y = norm_y * screen.height
+
+    return ui_x, ui_y, norm_x, norm_y
 end
 
 signals:Register("KeyFrame", "FrameFunc", function()

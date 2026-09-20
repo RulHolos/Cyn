@@ -298,6 +298,18 @@ function math.wrap(value, min, max)
 	return ((value - min) % range + range) % range + min
 end
 
+math.is_in_rect = function(x, y, obj_x, obj_y, obj_width, obj_height)
+    local half_w = obj_width * 0.5
+    local half_h = obj_height * 0.5
+    return math.abs(x - obj_x) <= half_w and math.abs(y - obj_y) <= half_h
+end
+
+math.is_in_circle = function(x, y, obj_x, obj_y, radius)
+    local dx = x - obj_x
+    local dy = y - obj_y
+    return (dx * dx + dy * dy) <= (radius * radius)
+end
+
 -------------------------------- Log
 
 ---@class cyn.global.LOG

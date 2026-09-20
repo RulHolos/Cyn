@@ -28,14 +28,14 @@ local function create_table_proxy(tbl_name)
     local mt = {
         __index = function(_, k)
             local v = _tables[tbl_name][k]
-            if type(v) == "table" then
-                return v
+
+            if type(v) == "string" and v:sub(1, 6) == "$tbl:" then
+                local ref_name = v:sub(7)
+                v = create_table_proxy(ref_name)
+                _tables[tbl_name][k] = v
             end
-            local child_tbl_name = tbl_name .. "__" .. tostring(k)
-            local child_proxy = create_table_proxy(child_tbl_name)
-            _tables[tbl_name][k] = child_proxy
-            _dirty_tables[tbl_name][k] = true
-            return child_proxy
+
+            return v
         end,
         __newindex = function(_, k, v)
             if type(v) == "table" then
@@ -91,6 +91,7 @@ M.scoredata = setmetatable({}, {
 ---Initializes the database and loads all tables into memory.
 function M.init_scoredata()
     local path = M.get_named_database()
+    print(path)
     local err, code
     db, err, code = sqlite.Database.open(path, sqlite.OPEN_READWRITE + sqlite.OPEN_CREATE)
     if not db then
@@ -234,7 +235,7 @@ end
 ---@return string
 function M.get_named_database()
     local settings = require("cyn.foundation.settings_manager"):get() --Avoid cyclic references
-    return dir_root .. "/" .. settings.game .. ".db"
+    return dir_root .. "/db/" .. settings.game .. ".db"
 end
 
 function M.snapshot()
@@ -242,42 +243,15 @@ function M.snapshot()
     lstg.Snapshot(file_name)
 end
 
----TODO: Move to its own class
 ---@param amount number Points to add
 ---@param update_hiscore boolean? Whether to update hiscore (default: true)
 function M.add_score(amount, update_hiscore)
-    local gs = core.userdata.gamestate
+    local gs = M.scoredata.player
     gs.score_target = (gs.score_target or gs.score) + amount
     if update_hiscore ~= false and gs.score_target > gs.hiscore then
         gs.hiscore = gs.score_target
     end
 end
-
----TODO: Move to its own class
----
----Must be called every frame to animate the score display.
-function M.tick_score()
-    local gs = core.userdata.gamestate
-    local target = gs.score_target or gs.score
-    local cur = gs.score
-    local diff = target - cur
-    if diff <= 0 then
-        gs.score = target
-        return
-    end
-    local step
-    if diff <= 100 then
-        step = 10
-    elseif diff <= 1000 then
-        step = 100
-    else
-        step = math.floor(diff / 60) * 10
-        step = math.max(step, 10)
-    end
-    gs.score = math.min(cur + step, target)
-end
-
---signals:Register("tick_score", "FrameFunc", M.tick_score)
 
 signals:Register("flush_scoredata", "GameExit", function()
     M.flush_scoredata()

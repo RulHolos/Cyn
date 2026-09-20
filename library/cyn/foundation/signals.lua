@@ -133,6 +133,8 @@ M.known_signals = {
     FocusLose = "FocusLose",
     SettingsLoaded = "SettingsLoaded",
     SettingsSaved = "SettingsSaved",
+    KeyStateChanged = "KeyStateChanged",
+    MouseStateChanged = "MouseStateChanged",
 }
 
 ---Registers a callback.

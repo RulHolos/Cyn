@@ -1,6 +1,9 @@
 local ui_manager = require("yeva.ui")
 local view = require("cyn.engine.viewport.view")
 local world = require("cyn.engine.viewport.world")
+local userdata = require("cyn.foundation.userdata_manager"):get()
+local i18n = require("cyn.presentation.i18n")
+local signals = require("cyn.foundation.signals")
 local ttf = require("cyn.engine.resources.ttf")
 
 local w = ui_manager.widget()
@@ -47,13 +50,15 @@ function w:init()
     set_common_text(self.score_value, 255, 255, 255)
     self.score_value:setAlignment("right", "top")
 
+    userdata.player.score = 50000
+
     --Populate text on first frame forced.
     self:frame()
 end
 
 function w:frame()
-    local score = core.userdata.gamestate.score
-    local hiscore = core.userdata.gamestate.hiscore
+    local score = userdata.player.score or 0
+    local hiscore = userdata.player.hiscore or 0
 
     if score ~= self.last_score then
         self.last_score = score
@@ -110,3 +115,27 @@ function w:del()
 end
 
 ui_manager:register_widget("score_ui", w)
+
+---Must be called every frame to animate the score display.
+function w.tick_score()
+    local gs = userdata.player
+    local target = gs.score_target or gs.score
+    local cur = gs.score
+    local diff = target - cur
+    if diff <= 0 then
+        gs.score = target
+        return
+    end
+    local step
+    if diff <= 100 then
+        step = 10
+    elseif diff <= 1000 then
+        step = 100
+    else
+        step = math.floor(diff / 60) * 10
+        step = math.max(step, 10)
+    end
+    gs.score = math.min(cur + step, target)
+end
+
+signals:Register("tick_score", signals.known_signals.FrameFunc, w.tick_score)

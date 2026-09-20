@@ -24,7 +24,7 @@ function M:set_userdata_class(userdata_class)
 end
 
 ---Shorthand for the userdata.scoredata table.
----@return cyn.IUserdata
+---@return table
 function M:get()
     assert(self.userdata, "userdata instance is not set")
     return self.userdata.scoredata

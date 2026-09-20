@@ -10,6 +10,19 @@ M.group, M.layer = pair[1], pair[2]
 local noop = function(self) end
 local all_classes = {}
 
+---Creates a new game object of the specified class.
+---
+---Calls that object's `init` callback.
+---@generic T:lstg.object
+---@param class T
+---@param ... any Arguments passed to class init.
+---@return T self
+function M.new(class, ...)
+    assert(type(class) == "table" and class.is_class, "cyn.object.new: class must be a table created via M.define.")
+
+    return lstg.New(class, ...)
+end
+
 ---@class cyn.object : lstg.object
 local object = {
     0, 0, 0, 0, 0, 0;
@@ -40,7 +53,7 @@ end
 ---@return cyn.object
 function M.define(base, define, sort)
     base = base or object
-    local result = { noop, noop, noop, lstg.DefaultRenderFunc, noop, noop, is_class = true, base = base }
+    local result = { noop, noop, noop, lstg.DefaultRenderFunc, noop, noop, is_class = true, base = base, new = M.new }
 
     setmetatable(result, { __index = base })
 

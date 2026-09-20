@@ -54,26 +54,6 @@ It's packaged with two frameworks: A re-implementation of THlib on the Cyn Libra
 
 Both frameworks are packaged inside this repository as they cannot be used on their own and require the Cyn library to work.
 
-### Folder Architecture
-Here is the Cyn folder architecture (only acknowledging critical stuff)
-
-```
-│
-├──📜
-├── 📁
-└── 📁
-
-📜 config.json
-📜 LuaSTGFlux.exe (and its dll)
-📂 assets/
-📂 frameworks/
-    ├── 📁 thlib/
-    └── 📁 yeva/
-📂 game/
-📂 i18n/
-📂 library/
-```
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 

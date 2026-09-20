@@ -5,9 +5,13 @@ local player = require("yeva.player")
 
 --#region Behaviors
 
-local b_move = require("yeva.player.default_behaviors.move")
-local b_animation = require("yeva.player.default_behaviors.animation")
-local b_power = require("yeva.player.default_behaviors.power")
+local patch = "yeva.player.default_behaviors."
+local b_death = require(patch .. "death")
+local b_collect = require(patch .. "collect")
+local b_move = require(patch .. "move")
+local b_animation = require(patch .. "animation")
+local b_power = require(patch .. "power")
+local b_grazer = require(patch .. "grazer")
 
 --#endregion
 
@@ -18,6 +22,9 @@ function M:init()
     self.atlas = image_atlas.from_file("assets/players/reimu/reimu.png")
     player.init(self)
     self.bound = false
+
+    --Should always be the first behavior attached cuz many depends on it.
+    local death = self:attach_behavior(b_death)
 
     local move = self:attach_behavior(b_move)
     move.speed = 4.5
@@ -32,6 +39,8 @@ function M:init()
     }
 
     local power = self:attach_behavior(b_power)
+    local collect = self:attach_behavior(b_collect)
+    local grazer = self:attach_behavior(b_grazer)
 end
 
 function M:frame()

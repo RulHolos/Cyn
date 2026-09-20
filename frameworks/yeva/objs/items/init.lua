@@ -1,5 +1,5 @@
-local image_atlas = require("core.engine.resources.image_atlas")
-local audio_manager = require("core.engine.resources.audio_manager")
+local image_atlas = require("cyn.engine.resources.image_atlas")
+local audio_manager = require("cyn.engine.resources.audio_manager")
 local object = require("cyn.engine.objects")
 local world = require("cyn.engine.viewport.world")
 local player = require("yeva.player")

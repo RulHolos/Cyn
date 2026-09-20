@@ -1,6 +1,9 @@
+local object = require("cyn.engine.objects")
+
 ---@class yeva.player.behavior
 ---@field name string
 ---@field player yeva.player
+---@field layer number The rendering layer of the behavior.
 ---@field init fun(self, ...) Called when the behavior is attached to a player.
 ---@field frame fun(self) Called every frame.
 ---@field render fun(self) Called every render frame.
@@ -25,6 +28,8 @@ function Behavior.define(name)
     b.colli = noop
     b.del = noop
     b.debug = nil -- Nil since it won't trigger if not defined.
+    b.layer = 0 -- Default rendering layer.
+    b.hide = false -- If true, will not trigger the render function.
     return b
 end
 

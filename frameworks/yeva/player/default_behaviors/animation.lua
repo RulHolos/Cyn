@@ -21,7 +21,6 @@ function M:init()
     self.lean = 0
 
     self.move = self.player:get_behavior("move")
-
     assert(self.move ~= nil, "A move behavior must be attached for this stock behavior to work.")
 end
 

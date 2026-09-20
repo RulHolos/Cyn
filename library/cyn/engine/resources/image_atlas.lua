@@ -164,4 +164,18 @@ function M:add_image_group(name_prefix, x, y, w, h, cols, rows, a, b, rect)
     return images
 end
 
+function M:render_ring(suffix, x, y, r1, r2, rot, n, nimg)
+    local da = 360 / n
+    local a = rot
+    for i = 1, n do
+        a = rot - da * i
+        lstg.Render4V(self:get_image(suffix .. ((i - 1) % nimg + 1)).name,
+            r1 * cos(a + da) + x, r1 * sin(a + da) + y, 0.5,
+            r2 * cos(a + da) + x, r2 * sin(a + da) + y, 0.5,
+            r2 * cos(a) + x, r2 * sin(a) + y, 0.5,
+            r1 * cos(a) + x, r1 * sin(a) + y, 0.5
+        )
+    end
+end
+
 return M

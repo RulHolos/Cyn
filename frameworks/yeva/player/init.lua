@@ -5,6 +5,7 @@ local behavior = require("yeva.player.behavior")
 
 ---@class yeva.player : cyn.object
 ---@field behaviors table<string, yeva.player.behavior>
+---@field behavior_order yeva.player.behavior[]
 local M = object.define()
 M.behavior = behavior
 
@@ -26,7 +27,12 @@ function M:init()
     self.group = object.group.PLAYER
     ---@type table<string, yeva.player.behavior>
     self.behaviors = {}
+    ---@type yeva.player.behavior[]
+    self.behavior_order = {}
+
+    self.lock = false
     self.protect = 0
+    self.time_stop = false
     self.in_dialog = false
 
     M.instance = self
@@ -35,7 +41,7 @@ function M:init()
 end
 
 function M:frame()
-    for _, b in pairs(self.behaviors) do
+    for _, b in ipairs(self.behavior_order) do
         b:frame()
     end
 
@@ -44,28 +50,35 @@ end
 
 function M:render()
     view:set("world")
-    for _, b in pairs(self.behaviors) do
-        b:render()
+    for _, b in ipairs(self.behavior_order) do
+        if not b.hide then
+            b:render()
+        end
     end
 end
 
 ---@param other cyn.object
 function M:colli(other)
-    for _, b in pairs(self.behaviors) do
+    for _, b in ipairs(self.behavior_order) do
         b:colli(other)
     end
 end
 
 function M:del()
-    for _, b in pairs(self.behaviors) do
+    for _, b in ipairs(self.behavior_order) do
         b:del()
     end
     self.behaviors = {}
+    self.behavior_order = {}
 
     M.instance = nil
 end
 
 -------------------------- Behaviors
+
+local function sort_behaviors_by_layer(a, b)
+    return (a.layer or 0) < (b.layer or 0)
+end
 
 ---Attaches a behavior to the player. Calls `init`.
 ---@generic T : yeva.player.behavior
@@ -75,8 +88,12 @@ function M:attach_behavior(behavior, ...)
     if self.behaviors[behavior.name] then
         self:detach_behavior(behavior.name)
     end
+
     local instance = behavior:new(self, ...)
     self.behaviors[behavior.name] = instance
+    table.insert(self.behavior_order, instance)
+    table.sort(self.behavior_order, sort_behaviors_by_layer)
+
     return instance
 end
 
@@ -84,9 +101,18 @@ end
 ---@param name string The name of the behavior to detach.
 function M:detach_behavior(name)
     local b = self.behaviors[name]
-    if b then
-        b:del()
-        self.behaviors[name] = nil
+    if not b then
+        return
+    end
+
+    b:del()
+    self.behaviors[name] = nil
+
+    for i, entry in ipairs(self.behavior_order) do
+        if entry == b then
+            table.remove(self.behavior_order, i)
+            break
+        end
     end
 end
 

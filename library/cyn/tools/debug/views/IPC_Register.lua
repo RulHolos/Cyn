@@ -8,7 +8,7 @@ local ImInputTextFlags = imgui.ImGuiInputTextFlags
 local ImTextBuffer = imgui.ImGuiTextBuffer
 local ImStyleVar = imgui.ImGuiStyleVar
 
----@class lstg.debug.view.IPC_Register : lstg.debug.view
+---@class cyn.debug.view.IPC_Register : cyn.debug.view
 local IPC_Register = {}
 
 function IPC_Register:getWindowName() return "IPC Register" end

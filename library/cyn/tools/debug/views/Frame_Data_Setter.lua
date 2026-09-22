@@ -26,7 +26,7 @@ local function ensure_layer_list()
     end
 end
 
----@class lstg.debug.view.Frame_Data_Setter : lstg.debug.view
+---@class cyn.debug.view.Frame_Data_Setter : cyn.debug.view
 local Frame_Data_Setter = {
     _render_layers = {},
 }

@@ -19,6 +19,9 @@ local b_grazer = require(patch .. "grazer")
 local M = object.define(player)
 
 function M:init()
+    self.name = "Reimu"
+    self.full_name = "Reimu Hakurei"
+
     self.atlas = image_atlas.from_file("assets/players/reimu/reimu.png")
     player.init(self)
     self.bound = false

@@ -18,7 +18,7 @@ M.instance = nil
 M.selectable_players = {}
 
 function M:init()
-    ---TODO: Get those names from selectable_players
+    ---TODO: Get those names from CDF
     self.name = "Placeholder"
     self.full_name = "Placeholder Full Name"
     self.x, self.y = 0, -192

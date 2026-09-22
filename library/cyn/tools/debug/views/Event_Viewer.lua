@@ -6,7 +6,7 @@ local ImVec2 = imgui.ImVec2
 local ImWindowFlags = imgui.ImGuiWindowFlags
 local ImStyleVar = imgui.ImGuiStyleVar
 
----@class lstg.debug.view.Event_Viewer : lstg.debug.view
+---@class cyn.debug.view.Event_Viewer : cyn.debug.view
 local Event_Viewer = {}
 
 function Event_Viewer:getWindowName() return "Event Viewer" end

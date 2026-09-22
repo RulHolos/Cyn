@@ -40,7 +40,7 @@ local function xpcall_handler(err)
     return debug.traceback(err)
 end
 
----@class lstg.debug.view.Console : lstg.debug.view
+---@class cyn.debug.view.Console : cyn.debug.view
 local Console = {}
 
 function Console:getWindowName() return "Console" end

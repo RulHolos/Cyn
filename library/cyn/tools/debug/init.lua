@@ -1,6 +1,6 @@
 local imgui_exists, imgui = pcall(require, "imgui")
 if not imgui_exists then
-    lstg.Log(4, "!! ImGui was invoked but doesn't exist !!")
+    lstg.Log(LOG.ERROR, "!! ImGui was invoked but doesn't exist !! (literally, how did you manage that)")
 end
 ImGui = imgui.ImGui
 
@@ -24,7 +24,10 @@ end
 local Keyboard = lstg.Input.Keyboard
 local F3_Trigger = KeyDownTrigger(Keyboard.F3)
 
----@param view lstg.debug.view
+local patch = "library.cyn.tools.debug.views."
+local path = "library/cyn/tools/debug/views/"
+
+---@param view cyn.debug.view
 local function layoutViewmenuItem(view)
     local enabled = view:getEnabled()
     if ImGui.MenuItem(view:getWindowName(), nil, enabled) then
@@ -33,10 +36,12 @@ local function layoutViewmenuItem(view)
     view:setState(enabled)
 end
 
----@param view lstg.debug.view
+---@param view cyn.debug.view
 local function layoutView(view)
     local enabled = view:getEnabled()
-    if not enabled then return end
+    if not enabled then
+        return
+    end
 
     local show = false
     show, enabled = ImGui.Begin(view:getWindowName(), enabled)
@@ -47,18 +52,20 @@ local function layoutView(view)
     ImGui.End()
 end
 
----@class lstg.debug.manager
+---@class cyn.debug.manager
 local M = {
-    ---@type table<string, lstg.debug.view>
+    ---@type table<string, cyn.debug.view>
     view_collection = {},
     ---@type boolean
     show_menu = false,
     ---@type string[]
-    view_categories = {}
+    view_categories = {},
+    ---@type table<string, string> module name -> last known view id, tracks what loadViews has already registered
+    loaded_modules = {}
 }
 Cyn.imgui_manager = M
 
----@param view lstg.debug.view
+---@param view cyn.debug.view
 function M:addView(view)
     table.insert(self.view_collection, { view:getViewId(), view })
 end
@@ -73,6 +80,34 @@ function M:removeView(view_id)
     end
 end
 
+---@param folder_path string? Directory to scan. Defaults to the built-in views folder.
+---@param module_patch string? Dotted require prefix matching folder_path. Defaults to the built-in views folder.
+function M:loadViews(folder_path, module_patch)
+    folder_path = folder_path or path
+    module_patch = module_patch or patch
+
+    local files = lstg.FileManager.EnumFiles(folder_path, "lua")
+
+    for _, v in ipairs(files) do
+        local file = string.sub(v[1], string.len(folder_path) + 1, string.len(v[1]) - 4)
+        local module_name = module_patch .. file
+        local previous_id = self.loaded_modules[module_name]
+
+        if previous_id then
+            self:removeView(previous_id)
+        end
+
+        package.loaded[module_name] = nil
+        local view = require(module_name)
+
+        lstg.Log(LOG.INFO, "Adding debug view from file: " .. file)
+        self:addView(view)
+        self.loaded_modules[module_name] = view:getViewId()
+    end
+
+    self:initializeCategories()
+end
+
 function M:initializeCategories()
     for _, v in ipairs(self.view_collection) do
         if not table.has_ivalue(self.view_categories, v[2].getMenuGroup()) then
@@ -82,7 +117,9 @@ function M:initializeCategories()
 end
 
 function M:frame()
-    if not imgui_exists then return end
+    if not imgui_exists then
+        return
+    end
 
     imgui.backend.NewFrame(self.show_menu)
     for _, v in ipairs(self.view_collection) do
@@ -97,13 +134,17 @@ local b_show_testinput_window = false
 local b_show_resmgr_window = false
 
 function M:layout()
-    if not DEBUG then return end
+    if not DEBUG then
+        return
+    end
 
     if F3_Trigger() then
         self.show_menu = not self.show_menu
     end
 
-    if not imgui_exists then return end
+    if not imgui_exists then
+        return
+    end
 
     ImGui.NewFrame()
     if self.show_menu then
@@ -160,27 +201,18 @@ function M:layout()
 end
 
 function M:render()
-    if not imgui_exists then return end
+    if not imgui_exists then
+        return
+    end
 
     ImGui.Render()
     imgui.backend.RenderDrawData()
 end
 
----- All views are automatically loaded here at startup only.               ----
----- If you wish to add more files at runtime, use `ImGuiManager:addView()` ----
----TODO: Fix the path
-local patch = "library.cyn.tools.debug.views."
-local path = "library/cyn/tools/debug/views/"
-
-local patches = lstg.FileManager.EnumFiles(path, "lua");
-for _, v in ipairs(patches) do
-    local file = string.sub(v[1], string.len(path) + 1, string.len(v[1]) - 4)
-    lstg.Log(LOG.INFO, "Adding debug view from file: " .. file)
-    M:addView(require(patch .. file))
-end
+M:loadViews("library/cyn/tools/debug/views/", "library.cyn.tools.debug.views.")
 
 ---- View Definition ----
----@class lstg.debug.view
+---@class cyn.debug.view
 local V = {
     enabled = false,
 }

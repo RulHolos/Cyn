@@ -1,28 +1,23 @@
---TODO: Move this to Yeva.
+---@diagnostic disable: duplicate-set-field wtf this makes no sense
+
+local yeva_player = require("yeva.player")
 
 local imgui_exists, imgui = pcall(require, "imgui")
-
 local ImGui = imgui.ImGui
-local ImVec2 = imgui.ImVec2
-local ImKey = imgui.ImGuiKey
-local ImWindowFlags = imgui.ImGuiWindowFlags
-local ImInputTextFlags = imgui.ImGuiInputTextFlags
-local ImTextBuffer = imgui.ImGuiTextBuffer
-local ImStyleVar = imgui.ImGuiStyleVar
 
----@class lstg.debug.view.Player : lstg.debug.view
-local Player = {}
+---@class yeva.debug.view.player : cyn.debug.view
+local M = {}
 
-function Player:getWindowName() return "Player Debugger" end
-function Player:getMenuGroup() return "Tools" end
-function Player:getViewId() return "view.Player" end
-function Player:getEnabled() return self.enabled end
+function M:getWindowName() return "Player Debugger" end
+function M:getMenuGroup() return "Tools" end
+function M:getViewId() return "view.Player" end
+function M:getEnabled() return self.enabled end
 ---@param v boolean
-function Player:setState(v) self.enabled = v end
+function M:setState(v) self.enabled = v end
 
-function Player:frame() end
-function Player:layout()
-    local player = nil --cyn.player.instance
+function M:frame() end
+function M:layout()
+    local player = yeva_player.instance
     if player == nil then
         ImGui.Text("No player instance found.")
         return
@@ -36,7 +31,7 @@ function Player:layout()
         player.protect = math.clamp(value, 0, 1000000)
     end
 
-    _, player.in_dialog = ImGui.Checkbox("In dialog?", player.in_dialog)
+    _, player.in_dialog = ImGui.Checkbox("In Dialog?", player.in_dialog)
 
     ImGui.Separator()
 
@@ -56,4 +51,4 @@ function Player:layout()
     end
 end
 
-return Player
+return M

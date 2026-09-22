@@ -19,6 +19,11 @@ But, unlike THlib which expects a LOT of things to be structed a very specific w
 This does mean that Yeva is much harder to use though, as you have to tie everything together yourself.
 
 Note on Yeva's classes names: They're equivalent to the folder/file architecture.
+
+Yeva does not impose strict rules or expect you to do a lot of things, but it expects a minimum and conformity to this minimum.
+One of the most stiff part of Yeva is the player system (with default behaviors).
+A lot of Yeva actually expects you to use CDF extensively and a specific architecture for character data, dialogs, ... (They will be explained in the documentation of all these systems)
+If you want to opt out of CDF to use something else like toml (why would you) then you will need to change all CDF references. It's not that hard but time consuming.
 ]]
 
 lstg.SetTitle("Yeva Framework v0.10a")
@@ -26,6 +31,9 @@ lstg.SetTitle("Yeva Framework v0.10a")
 local userdata = require("yeva.db.userdata")
 require("yeva.db.settings")
 userdata.init_scoredata()
+
+local imguidebug = require("cyn.tools.debug")
+imguidebug:loadViews("frameworks/yeva/imgui_views/", "frameworks.yeva.imgui_views.")
 
 lstg.Log(LOG.INFO, "Cyn initialized")
 lstg.Log(LOG.INFO, "Running Yeva Framework")

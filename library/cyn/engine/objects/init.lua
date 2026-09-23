@@ -1,6 +1,6 @@
 --- Class system inspired by Cyanlib (because I love your way of doing it)
 
----@class cyn.object
+---@class cyn.object : lstg.object
 local M = {}
 
 local pair = require("cyn.engine.objects.groups")

@@ -25,7 +25,8 @@ end
 
 local function frame_objects()
     if DEBUG then
-        lstg.PartialObjFrame(debug_data.frame_groups, debug_data.frame_world)
+        lstg.ObjFrame()
+        --lstg.PartialObjFrame(debug_data.frame_groups, debug_data.frame_world)
     else
         lstg.ObjFrame()
     end
@@ -41,9 +42,7 @@ local function frame_objects()
     lstg.CollisionCheck(g.IMMORTAL_ENEMY, g.PLAYER_BULLET)
     lstg.CollisionCheck(g.ITEM, g.PLAYER)
 
-    if not DEBUG then
-        lstg.UpdateXY()
-    end
+    lstg.UpdateXY()
     lstg.AfterFrame()
 end
 
@@ -83,8 +82,6 @@ function RenderFunc()
 
     render_objects()
     signals:Emit(signals.known_signals.RenderFunc)
-
-    lstg.AfterFrame()
 
     lstg.EndScene()
 end

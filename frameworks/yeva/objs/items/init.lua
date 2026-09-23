@@ -37,7 +37,7 @@ function item:init(x, y, t, v, angle)
 end
 
 function item:frame()
-    --local player = self.target
+    local player = self.target
     if self.timer < 24 then
         self.rot = self.rot + 45
         self.hscale = (self.timer + 25) / 48
@@ -47,9 +47,9 @@ function item:frame()
             self.vx = 0
         end
     elseif self.attract > 0 then
-        --local a = lstg.Angle(self, player)
-        --self.vx = self.attract * cos(a) + player.dx * 0.5
-        --self.vy = self.attract * sin(a) + player.dy * 0.5
+        local a = lstg.Angle(self, player)
+        self.vx = self.attract * cos(a) + player.dx * 0.5
+        self.vy = self.attract * sin(a) + player.dy * 0.5
     elseif self.attract == 0 then
         self.vy = math.max(self.dy - 0.03, -1.7)
         --TODO: Is on graze: self.vy = max(self.vy, -0.5)

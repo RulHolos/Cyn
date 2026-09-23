@@ -15,7 +15,7 @@ function M:init()
     ---@type resource.image[] | yeva.player.behavior.animation.imgs.named
     self.imgs = {}
     self.a, self.r, self.g, self.b = 255, 255, 255, 255
-    self.ani_interval = 16
+    self.ani_interval = 8
     self.max_left = 6
     self.max_right = 6
     self.lean = 0

@@ -310,6 +310,8 @@ math.is_in_circle = function(x, y, obj_x, obj_y, radius)
     return (dx * dx + dy * dy) <= (radius * radius)
 end
 
+math.INF = 4294967296 --Magic number from THlib because why bother
+
 -------------------------------- Log
 
 ---@class cyn.global.LOG

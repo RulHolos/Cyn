@@ -19,7 +19,7 @@ local co_stack_n = 0
 ---@param target table
 ---@param f fun()
 ---@return thread
-function task.New(target, f)
+function task.new(target, f)
     ---@type table?
     local tasks = rawget(target, field)
     if not tasks then
@@ -37,7 +37,7 @@ function task.New(target, f)
 end
 
 ---@param target table
-function task.Do(target)
+function task.exec(target)
     local tasks = rawget(target, field)
     if not tasks then
         return
@@ -121,7 +121,7 @@ end
 
 ---@param target table
 ---@param reserve_current boolean?
-function task.Clear(target, reserve_current)
+function task.clear(target, reserve_current)
     local tasks = rawget(target, field)
     if not tasks then
         return
@@ -150,7 +150,7 @@ function task.Clear(target, reserve_current)
 end
 
 ---@param frames number?
-function task.Wait(frames)
+function task.wait(frames)
     frames = max(1, floor(frames or 1))
 
     for _ = 1, frames do

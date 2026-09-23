@@ -10,7 +10,7 @@ local player = require("yeva.player")
 local item = object.define()
 
 ---Note: This item atlas is never deleted anywhere in code. See if this becomes an issue later. Probably not.
-local item_atlas = image_atlas.from_file("assets/general/item.png")
+local item_atlas = image_atlas.from_file("assets/yeva/items/item.png")
 item_atlas:set_sampler_state("point+wrap")
 
 local item_img = item_atlas:add_image_group("item_", 0, 0, 32, 32, 2, 6, 8, 8)
@@ -37,31 +37,32 @@ function item:init(x, y, t, v, angle)
 end
 
 function item:frame()
-    local player = self.target
+    --local player = self.target
     if self.timer < 24 then
         self.rot = self.rot + 45
         self.hscale = (self.timer + 25) / 48
         self.vscale = self.hscale
-        if self.timer == 2 then
+        if self.timer == 22 then
             self.vy = math.min(self.v, 2)
             self.vx = 0
         end
     elseif self.attract > 0 then
-        local a = lstg.Angle(self, player)
-        self.vx = self.attract * cos(a) + player.dx * 0.5
-        self.vy = self.attract * sin(a) + player.dy * 0.5
+        --local a = lstg.Angle(self, player)
+        --self.vx = self.attract * cos(a) + player.dx * 0.5
+        --self.vy = self.attract * sin(a) + player.dy * 0.5
     elseif self.attract == 0 then
         self.vy = math.max(self.dy - 0.03, -1.7)
         --TODO: Is on graze: self.vy = max(self.vy, -0.5)
     else
         self.vy = math.max(self.dy - 0.03, -0.05)
     end
-    if self.y < -(world.current.b) - world.current.boundb then
+    if self.y < world.current.boundb then
         lstg.Del(self)
     end
     if self.attract >= 8 then
         self.collected = true
     end
+    frame_count = frame_count + 1
 end
 
 function item:render()
@@ -72,6 +73,9 @@ function item:render()
     end
 end
 
+---Handles collision with player. Calls the item's collect function.
+---
+---Usually, item's "collect" functions define a signal group as `item.collect:power` for example. `item.collect:` followed by the object's file or class name. Easily searchable.
 ---@param other cyn.object
 function item:colli(other)
     if other == player.instance then
@@ -82,3 +86,5 @@ function item:colli(other)
         audio_manager.play_se("item00", 0.3, self.x / (world._default.play.w / 2))
     end
 end
+
+return item

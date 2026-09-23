@@ -56,7 +56,7 @@ end
 
 function menu_node:frame()
     tween.Do(self)
-    task.Do(self)
+    task.exec(self)
 
     if self.entering and self.alpha >= 255 then
         self.entering = false

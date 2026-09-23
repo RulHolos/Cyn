@@ -373,7 +373,7 @@ function M:_frame()
         return
     end
 
-    task.Do(self.current_stage)
+    task.exec(self.current_stage)
     self.current_stage:frame()
     self.current_stage.timer = self.current_stage.timer + 1
 end

@@ -53,7 +53,10 @@ end
 ---@return cyn.object
 function M.define(base, define, sort)
     base = base or object
-    local result = { noop, noop, noop, lstg.DefaultRenderFunc, noop, noop, is_class = true, base = base, new = M.new }
+    local result = {
+        noop, noop, noop, lstg.DefaultRenderFunc, noop, noop,
+        is_class = true,
+        base = base, new = M.new, define = M.define }
 
     setmetatable(result, { __index = base })
 

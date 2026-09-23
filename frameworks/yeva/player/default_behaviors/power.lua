@@ -27,7 +27,7 @@ function M:init()
         end)
     end
 
-    signals:Register("player:getPower", "item:getPower", function(amount)
+    signals:Register("player:getPower", "item.collect:power", function(amount)
         if amount == -1 then
             amount = self.max_power
         end

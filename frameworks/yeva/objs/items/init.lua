@@ -62,7 +62,6 @@ function item:frame()
     if self.attract >= 8 then
         self.collected = true
     end
-    frame_count = frame_count + 1
 end
 
 function item:render()

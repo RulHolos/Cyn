@@ -152,4 +152,20 @@ function M:has_control()
     return state == states.ALIVE or state == states.DEATHBOMB_WINDOW
 end
 
+function M:debug()
+    if ImGui.Button("Kill") then
+        self:hit()
+    end
+
+    local success, value = ImGui.InputInt("Death State", self.death_state, 1, 8)
+    if success then
+        self.death_state = math.clamp(value, 1, 8)
+    end
+
+    success, value = ImGui.InputInt("Grace Frames", self.death_durations[states.DEATHBOMB_WINDOW], 1, math.INF)
+    if success then
+        self.death_durations[states.DEATHBOMB_WINDOW] = math.clamp(value, 1, 60)
+    end
+end
+
 return M

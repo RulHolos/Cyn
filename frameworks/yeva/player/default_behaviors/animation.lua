@@ -89,4 +89,11 @@ function M:render()
     lstg.Render(self.img.name, self.player.x, self.player.y, self.player.rot)
 end
 
+function M:debug()
+    local success, value = ImGui.InputInt("Animation Interval (frames)", self.ani_interval, 1, math.INF)
+    if success then
+        self.ani_interval = math.clamp(value, 1, math.INF)
+    end
+end
+
 return M

@@ -52,7 +52,6 @@ function item:frame()
         self.vy = self.attract * sin(a) + player.dy * 0.5
     elseif self.attract == 0 then
         self.vy = math.max(self.dy - 0.03, -1.7)
-        --TODO: Is on graze: self.vy = max(self.vy, -0.5)
     else
         self.vy = math.max(self.dy - 0.03, -0.05)
     end

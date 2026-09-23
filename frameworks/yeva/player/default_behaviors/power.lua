@@ -55,10 +55,20 @@ function M:debug()
     _, self.lose_power_by_dying = ImGui.Checkbox("Lose power by dying", self.lose_power_by_dying)
     _, self.spawn_power_items_on_death = ImGui.Checkbox("Spawn power items on death", self.spawn_power_items_on_death)
 
-    local success, value = ImGui.InputInt("Current power value", self.current_power, 1, 5)
+    local success, value = ImGui.InputInt("Current power value", self.current_power, 1, math.INF)
     if success then
         self.current_power = math.clamp(value, self.min_power, self.max_power)
         gamestate.power = self.current_power
+    end
+
+    local success, value = ImGui.InputInt("Minimum safe power", self.min_safe_power, 1, math.INF)
+    if success then
+        self.min_safe_power = math.clamp(value, self.min_power, self.max_power)
+    end
+
+    local success, value = ImGui.InputInt("Maximum power", self.max_power, 1, math.INF)
+    if success then
+        self.max_power = math.clamp(value, self.min_power, math.huge)
     end
 end
 

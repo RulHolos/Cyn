@@ -59,7 +59,25 @@ function M:frame()
     end
 end
 
-function M:render()
+function M:debug()
+    local success, value = ImGui.InputFloat("Normal Speed", self.speed, 0.1, math.INF, "%.1f")
+    if success then
+        self.speed = value
+    end
+
+    success, value = ImGui.InputFloat("Focus Speed", self.focus_speed, 0.1, math.INF, "%.1f")
+    if success then
+        self.focus_speed = value
+    end
+
+    --_, self.force_focus = ImGui.Checkbox("Force focus", self.force_focus)
+    --_, self.lock = ImGui.Checkbox("Lock movement", self.lock)
+    local before = self.keep_player_in_bounds
+    _, self.keep_player_in_bounds = ImGui.Checkbox("Restrict to Bounds", self.keep_player_in_bounds)
+    local after = self.keep_player_in_bounds
+    if before ~= after then
+        self.player.bound = self.keep_player_in_bounds
+    end
 end
 
 return M

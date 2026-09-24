@@ -1,4 +1,4 @@
----@class cyn.object.group
+---@class cyn.object.group : integer
 local groups = {
     GHOST = 0,
     ENEMY_BULLET = 1,
@@ -12,7 +12,7 @@ local groups = {
     BOSS = 9,
 }
 
----@class cyn.object.layer
+---@class cyn.object.layer : integer
 local layers = {
     BACKGROUND = -900,
     ENEMIES = -800,

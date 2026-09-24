@@ -1,7 +1,4 @@
 local player = require("yeva.player")
-local input = require("cyn.engine.input")
-local world = require("cyn.engine.viewport.world")
-local view = require("cyn.engine.viewport.view")
 local image_group = require("cyn.engine.resources.image_atlas")
 local img = require("cyn.engine.resources.image")
 
@@ -17,18 +14,6 @@ function M:init()
     self._pause = 0
     self._collectCounter = 0
 
-    ---@type yeva.player.behavior.move?
-    self.move = self.player:get_behavior("move")
-    assert(self.move ~= nil, "A move behavior must be attached for this stock behavior to work.")
-
-    ---@type yeva.player.behavior.death?
-    self.death = self.player:get_behavior("death")
-    assert(self.death ~= nil, "A death behavior must be attached for this stock behavior to work.")
-
-    ---@type yeva.player.behavior.collect?
-    self.collect = self.player:get_behavior("collect")
-    assert(self.collect ~= nil, "A collect behavior must be attached for this stock behavior to work.")
-
     local alpha80 = lstg.Color(0x80FFFFFF)
 
     --This is a default visual. You can change that no problem.
@@ -43,6 +28,20 @@ function M:init()
 
     self.player_aura = img.from_file("assets/yeva/players/player_aura.png", true)
     --self.player_aura:set_sampler_state("point+clamp")
+end
+
+function M:get_deps()
+    ---@type yeva.player.behavior.move?
+    self.move = self.player:get_behavior("move")
+    assert(self.move ~= nil, "A move behavior must be attached for this stock behavior to work.")
+
+    ---@type yeva.player.behavior.death?
+    self.death = self.player:get_behavior("death")
+    assert(self.death ~= nil, "A death behavior must be attached for this stock behavior to work.")
+
+    ---@type yeva.player.behavior.collect?
+    self.collect = self.player:get_behavior("collect")
+    assert(self.collect ~= nil, "A collect behavior must be attached for this stock behavior to work.")
 end
 
 function M:frame()

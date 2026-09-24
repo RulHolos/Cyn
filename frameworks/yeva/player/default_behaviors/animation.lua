@@ -19,7 +19,9 @@ function M:init()
     self.max_left = 6
     self.max_right = 6
     self.lean = 0
+end
 
+function M:get_deps()
     self.move = self.player:get_behavior("move")
     assert(self.move ~= nil, "A move behavior must be attached for this stock behavior to work.")
 end

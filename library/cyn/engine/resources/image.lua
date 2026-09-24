@@ -102,8 +102,11 @@ end
 
 ---Changes the color of the image.
 ---@param color1 lstg.Color
-function M:set_color(color1)
-    lstg.SetImageState(self.name, self.blendmode, color1)
+---@param color2 lstg.Color?
+---@param color3 lstg.Color?
+---@param color4 lstg.Color?
+function M:set_color(color1, color2, color3, color4)
+    lstg.SetImageState(self.name, self.blendmode, color1, color2 or color1, color3 or color1, color4 or color1)
 end
 
 ---Sets the scale of this image.
@@ -180,6 +183,20 @@ end
 ---@param scale_y number
 function M:render_3d(x, y, z, rot_x, rot_y, rot_z, scale_x, scale_y)
     lstg.Render3D(self.name, x, y, z, rot_x, rot_y, rot_z, scale_x, scale_y)
+end
+
+function M:render_circle(x, y, r, points)
+    local ang = 360 / (2 * points)
+    for angle = 360 / points, 360, 360 / points do
+        local x1, y1 = x + r * cos(angle + ang), y + r * sin(angle + ang)
+        local x2, y2 = x + r * cos(angle - ang), y + r * sin(angle - ang)
+        self:render_4v(
+            x, y, 0.5,
+            x, y, 0.5,
+            x1, y1, 0.5,
+            x2, y2, 0.5
+        )
+    end
 end
 
 return M

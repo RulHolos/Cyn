@@ -1,5 +1,97 @@
 local player = require("yeva.player")
 local audio_manager = require("cyn.engine.resources.audio_manager")
+local object = require("cyn.engine.objects")
+local task = require("cyn.foundation.task")
+local img = require("cyn.engine.resources.image")
+
+--#region death_eff
+
+local death_eff = object.define()
+
+---@param type "first"|"second"
+function death_eff:init(x, y, type)
+    self.x, self.y = x, y
+    self.type = type
+    self.size, self.size1 = 0, 0
+    self.layer = object.layer.TOP - 1
+    task.new(self, function()
+        local size, size1 = 0, 0
+        if self.type == "second" then
+            task.wait(30)
+        end
+        for _ = 1, 360 do
+            self.size = size
+            self.size1 = size1
+            size = size + 12
+            size1 = size1 + 8
+            task.wait()
+        end
+    end)
+
+    local white = lstg.Color(255, 255, 255, 255)
+    local black = lstg.Color(255, 0, 0, 0)
+
+    self.rev = img.from_file("assets/general/white.png")
+    self.rev:set_blendmode("add+sub")
+    self.rev:set_color(white, white, black, black)
+end
+function death_eff:frame()
+    task.exec(self)
+    if self.timer > 180 then
+        lstg.Del(self)
+    end
+end
+function death_eff:render()
+    if self.type == "first" then
+        self.rev:render_circle(self.x, self.y, self.size, 60)
+        self.rev:render_circle(self.x + 35, self.y + 35, self.size1, 60)
+        self.rev:render_circle(self.x + 35, self.y - 35, self.size1, 60)
+        self.rev:render_circle(self.x - 35, self.y + 35, self.size1, 60)
+        self.rev:render_circle(self.x - 35, self.y - 35, self.size1, 60)
+    elseif self.type == "second" then
+        self.rev:render_circle(self.x, self.y, self.size, 60)
+    else
+        error("Unknown death effect type: " .. tostring(self.type))
+    end
+end
+function death_eff:del()
+    if self.rev then
+        self.rev:destroy()
+        self.rev = nil
+    end
+end
+
+--#endregion
+--#region Bullet Deleter
+
+local bullet_deleter = object.define()
+
+---@param kill_indes boolean Kill indestructible bullets too
+function bullet_deleter:init(x, y, kill_indes)
+    self.x, self.y = x, y
+    self.kill_indes = kill_indes
+    self.group = object.group.GHOST
+    self.hide = true
+end
+function bullet_deleter:frame()
+    if self.timer >= 60 then
+        lstg.Del(self)
+    end
+    for _, o in lstg.ObjList(object.group.ENEMY_BULLET) do
+        if lstg.Dist(self, o) < self.timer * 20 then
+            lstg.Del(o)
+        end
+    end
+    if self.kill_indes then
+        for _, o in lstg.ObjList(object.group.INDES) do
+            if lstg.Dist(self, o) < self.timer * 20 then
+                lstg.Del(o)
+            end
+        end
+    end
+end
+
+--#endregion
 
 ---@class yeva.player.behavior.death : yeva.player.behavior
 local M = player.behavior.define("death")
@@ -52,17 +144,26 @@ function M:init()
     }
 end
 
+function M:get_deps()
+    ---@type yeva.player.behavior.miss?
+    self.miss = self.player:get_behavior("miss")
+    if not self.miss then
+        lstg.Log(LOG.WARN, "Miss behavior not found for the player. Will not trigger a miss when dying.")
+    end
+end
+
 ---@private
 function M:on_frame_hit()
-    --self.miss:trigger() --Replaces item.PlayerMiss(p)
+    if self.miss then
+        self.miss:trigger()
+    end
     --TODO: Death weapon
 
-   --[[
-    p.deathee = {}
-    p.deathee[1] = New(deatheff, p.x, p.y, "first")
-    p.deathee[2] = New(deatheff, p.x, p.y, "second")
- 
-    New(player_death_ef, p.x, p.y)]]
+    self.death_eff = {}
+    self.death_eff[1] = death_eff:new(self.player.x, self.player.y, "first")
+    self.death_eff[2] = death_eff:new(self.player.x, self.player.y, "second")
+
+    --New(player_death_ef, p.x, p.y)
 end
 
 ---@private
@@ -78,7 +179,7 @@ function M:on_frame_respawn()
     self.player.y = -236
     self.player.hide = false
 
-    --New(bullet_deleter, self.player.x, self.player.y)
+    bullet_deleter:new(self.player.x, self.player.y)
 end
 
 ---@private

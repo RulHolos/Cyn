@@ -36,8 +36,17 @@ function M:init()
     self.in_dialog = false
 
     M.instance = self
+end
 
-    --self:attach_behavior(d)
+---This function will call `get_deps` on all attached behaviors. Used for behaviors that needs dependencies that would be circular for example.
+---
+---That function MUST be called (if you use it,) at the very end of your player's init().
+function M:set_behavior_deps()
+    for _, b in ipairs(self.behavior_order) do
+        if b.get_deps then
+            b:get_deps()
+        end
+    end
 end
 
 function M:frame()

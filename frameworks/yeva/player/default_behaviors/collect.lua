@@ -1,11 +1,6 @@
 local player = require("yeva.player")
-local input = require("cyn.engine.input")
-local world = require("cyn.engine.viewport.world")
-local image_group = require("cyn.engine.resources.image_atlas")
-local audio_manager = require("cyn.engine.resources.audio_manager")
 local object = require("cyn.engine.objects")
 local ease_out_quad = require("cyn.global_scripts.easing").outQuad
-local item = require("yeva.objs.items")
 
 ---@class yeva.player.behavior.collect : yeva.player.behavior
 local M = player.behavior.define("collect")
@@ -20,7 +15,9 @@ function M:init()
     ---Defaults to outQuad
     ---@type fun(t: number): number
     self.ease_function = ease_out_quad
+end
 
+function M:get_deps()
     ---@type yeva.player.behavior.move?
     self.move = self.player:get_behavior("move")
     assert(self.move ~= nil, "A move behavior must be attached for this stock behavior to work.")
@@ -87,6 +84,18 @@ function M:frame()
                 end
             end
         end
+    end
+end
+
+function M:debug()
+    local success, value = ImGui.InputInt("Collect Ring Radius", self.collect_ring_radius, 1, math.INF)
+    if success then
+        self.collect_ring_radius = math.clamp(value, 1, math.INF)
+    end
+
+    local success, value = ImGui.InputInt("Collect Line", self.collect_line, 1, math.INF)
+    if success then
+        self.collect_line = math.clamp(value, 1, math.INF)
     end
 end
 

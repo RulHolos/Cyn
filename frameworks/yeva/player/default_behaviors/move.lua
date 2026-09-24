@@ -24,17 +24,19 @@ function M:frame()
 
     local speed = self.is_focus and self.focus_speed or self.speed
 
-    if input:is_down("up") then
-        dy = dy + 1
-    end
-    if input:is_down("down") then
-        dy = dy - 1
-    end
-    if input:is_down("left") then
-        dx = dx - 1
-    end
-    if input:is_down("right") then
-        dx = dx + 1
+    if not self.player.lock then
+        if input:is_down("up") then
+            dy = dy + 1
+        end
+        if input:is_down("down") then
+            dy = dy - 1
+        end
+        if input:is_down("left") then
+            dx = dx - 1
+        end
+        if input:is_down("right") then
+            dx = dx + 1
+        end
     end
 
     if dx * dy ~= 0 then

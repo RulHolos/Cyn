@@ -12,6 +12,7 @@ local b_move = require(patch .. "move")
 local b_animation = require(patch .. "animation")
 local b_power = require(patch .. "power")
 local b_grazer = require(patch .. "grazer")
+local b_miss = require(patch .. "miss")
 
 --#endregion
 
@@ -19,21 +20,20 @@ local b_grazer = require(patch .. "grazer")
 local M = object.define(player)
 
 function M:init()
+    player.init(self)
     self.name = "Reimu"
     self.full_name = "Reimu Hakurei"
 
     self.atlas = image_atlas.from_file("assets/players/reimu/reimu.png")
-    player.init(self)
+    self.atlas:set_sampler_state("point+wrap")
     self.bound = false
 
-    --Should always be the first behavior attached cuz many depends on it.
     local death = self:attach_behavior(b_death)
 
     local move = self:attach_behavior(b_move)
     move.speed = 4.5
     move.focus_speed = 2
 
-    self.atlas:set_sampler_state("point+wrap")
     local b_anim = self:attach_behavior(b_animation)
     b_anim.imgs = {
         normal = self.atlas:add_animation_strip("n", 0, 0, 32, 48, 8),
@@ -44,6 +44,9 @@ function M:init()
     local power = self:attach_behavior(b_power)
     local collect = self:attach_behavior(b_collect)
     local grazer = self:attach_behavior(b_grazer)
+    local miss = self:attach_behavior(b_miss)
+
+    self:set_behavior_deps()
 end
 
 function M:frame()

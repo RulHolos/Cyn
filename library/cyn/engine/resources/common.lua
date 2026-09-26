@@ -26,6 +26,7 @@ M.ENUM_RES_TYPE = { tex = 1, img = 2, ani = 3, bgm = 4, snd = 5, psi = 6, fnt = 
 ---| "fx"
 ---| "model"
 ---| "video"
+---| "imggrp" Artificial type
 
 ---@alias ResourceTypesClasses
 ---| resource.texture

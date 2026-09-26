@@ -65,9 +65,9 @@ end
 
 function item:render()
     if self.y > world.current.t then
-        item_img_up[self.index]:render(self.x, world.current.t - 8)
+        item_img_up:get(self.index):render(self.x, world.current.t - 8)
     else
-        item_img[self.index]:render(self.x, self.y, self.rot)
+        item_img:get(self.index):render(self.x, self.y, self.rot)
     end
 end
 

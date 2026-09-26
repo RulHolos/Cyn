@@ -12,6 +12,7 @@ function w:init()
 
     self.lines = image_atlas.from_file("assets/ui/line.png", true)
     self.lines:set_sampler_state("point+wrap")
+    --TODO: Rework with image_group
     self.lines:add_image_group("line_", 0, 0, 200, 8, 1, 7)
 
     local wo = world.current

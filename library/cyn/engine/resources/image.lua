@@ -46,25 +46,29 @@ end
 
 ---Loads an image from an existing texture.
 ---@param tex string|resource.texture|resource.render_target identifier of an existing texture, or texture handler.
+---@param x number? x-coordinate of the sub-region within the texture.
+---@param y number? y-coordinate of the sub-region within the texture.
+---@param width number? width of the sub-region within the texture.
+---@param height number? height of the sub-region within the texture.
 ---@param a number? horizontal size of collision
 ---@param b number? vertical size of collision (same as `a` if nil.)
 ---@param rect boolean? whether to use rectangular collision instead of circular.
 ---@return resource.image Image
-function M.from_texture(tex, a, b, rect)
+function M.from_texture(tex, x, y, width, height, a, b, rect)
     local img = MakeInstance(M)
     local name
 
     if type(tex) == "string" then
         local w, h = lstg.GetTextureSize(tex)
         name = common.get_typed_name("img", tex)
-        lstg.LoadImage(name, tex, 0, 0, w, h, a or 0, b or a or 0, rect or false)
-        img.width = w
-        img.height = h
+        lstg.LoadImage(name, tex, x or 0, y or 0, width or w, height or h, a or 0, b or a or 0, rect or false)
+        img.width = width or w
+        img.height = height or h
     elseif type(tex) == "table" and (getmetatable(tex) == texture or getmetatable(tex) == render_target) then
         name = common.get_typed_name("img", tex.name)
-        lstg.LoadImage(name, tex.name, 0, 0, tex.width, tex.height, a or 0, b or a or 0, rect or false)
-        img.width = tex.width
-        img.height = tex.height
+        lstg.LoadImage(name, tex.name, x or 0, y or 0, width or tex.width, height or tex.height, a or 0, b or a or 0, rect or false)
+        img.width = width or tex.width
+        img.height = height or tex.height
     else
         error("Invalid texture argument for image creation: must be a texture name or resource.texture or resource.render_target instance.")
     end

@@ -2,6 +2,7 @@ local common = require("cyn.engine.resources.common")
 local image = require("cyn.engine.resources.image")
 local texture = require("cyn.engine.resources.texture")
 local render_target = require("cyn.engine.resources.render_target")
+local imggrp = require("cyn.engine.resources.image_group")
 
 ---@class resource.image_atlas : resource_base
 local M = {
@@ -144,7 +145,7 @@ end
 ---@param a number? Collision width.
 ---@param b number? Collision height (defaults to `a`).
 ---@param rect boolean? Use rectangular collision.
----@return resource.image[]
+---@return resource.image_group
 function M:add_image_group(name_prefix, x, y, w, h, cols, rows, a, b, rect)
     local images = {}
     for i = 0, cols * rows - 1 do
@@ -161,7 +162,7 @@ function M:add_image_group(name_prefix, x, y, w, h, cols, rows, a, b, rect)
         images[i + 1] = img
         self.parts[suffix] = img
     end
-    return images
+    return imggrp.from_array(images)
 end
 
 function M:render_ring(suffix, x, y, r1, r2, rot, n, nimg)

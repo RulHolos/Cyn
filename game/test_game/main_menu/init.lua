@@ -4,6 +4,9 @@ local reimu = require("yeva.players.reimu")
 local task = require("cyn.foundation.task")
 local power = require("yeva.objs.items.power")
 local large_power = require("yeva.objs.items.large_power")
+local bullets = require("yeva.bullets")
+
+local colliders = require("cyn.tools.colliders_debug")
 
 local entry = stage_manager:new_stage("loading", { entry_point = true })
 function entry:init()
@@ -17,6 +20,9 @@ function entry:init()
         for _ = 1, math.INF do
             power:new(-100, 220)
             large_power:new(100, 220)
+
+            bullets.fire("arrow_big", bullets.colors.RED, 0, 0, 1.8, -45, false)
+
             task.wait(30)
         end
     end)

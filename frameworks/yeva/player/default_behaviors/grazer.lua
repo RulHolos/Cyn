@@ -17,6 +17,7 @@ function M:init()
     local alpha80 = lstg.Color(0x80FFFFFF)
 
     --This is a default visual. You can change that no problem.
+    --TODO: Rework with image_group
     self.collect_ring = image_group.from_file("general/white.png", true)
     self.collect_ring:add_image_group("item_collect_ring", 0, 0, 110, 62, 1, 10)
     for i = 1, 10 do

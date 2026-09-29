@@ -249,7 +249,7 @@ end
 
 ---Jump to another stage or stage group.
 ---@param name string Name of an existing stage or group.
-function M:goto(name)
+function M:go_to(name)
     self:set_next(name)
     self:switch()
 end
@@ -260,7 +260,7 @@ end
 ---  When the group is emmpty, if exists to `group.after` or menu stage.
 ---  No need to call `set_next` in this context.
 ---
----- **Orphan context**: you must have queued a destination first with `set_next` or `goto`.
+---- **Orphan context**: you must have queued a destination first with `set_next` or `go_to`.
 function M:switch()
     userdata_manager.userdata.save()
 

@@ -10,8 +10,8 @@ lstg.IPC.register("exec", function(code)
 end)
 
 ---Switches to another stage
-lstg.IPC.register("stage_goto", function(name)
-    --cyn.stage_manager:goto(name)
+lstg.IPC.register("stage_go_to", function(name)
+    --cyn.stage_manager:go_to(name)
 end)
 
 lstg.IPC.register("quit", function()

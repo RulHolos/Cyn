@@ -14,4 +14,8 @@ require("yeva.ui.widgets.score")
 
 require("game.test_game.main_menu")
 
+local nori = require("nori")
+nori.using_framework = "yeva"
+nori:initialize()
+
 lstg.Log(LOG.DEBUG, "Finished loading root.lua")

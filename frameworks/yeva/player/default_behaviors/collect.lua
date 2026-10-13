@@ -1,6 +1,7 @@
 local player = require("yeva.player")
 local object = require("cyn.engine.objects")
 local ease_out_quad = require("cyn.global_scripts.easing").outQuad
+local ImGui = require("imgui").ImGui
 
 ---@class yeva.player.behavior.collect : yeva.player.behavior
 local M = player.behavior.define("collect")

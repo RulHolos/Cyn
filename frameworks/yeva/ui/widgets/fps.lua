@@ -11,7 +11,7 @@ function w:init()
     self.fps = lstg.RichText.createFromPool(self.font.name, 5)
     self.fps:setAlignment("right", "bottom")
     self.fps:setFillColor(lstg.Color(255, 200, 200, 200))
-    self.fps:setOutline(1, lstg.Color(255, 0, 0, 0))
+    self.fps:setOutline(0.5, lstg.Color(255, 0, 0, 0))
     self.fps:setText("FPS: 0")
 end
 

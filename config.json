@@ -38,6 +38,11 @@
                 "path": "library/"
             },
             {
+                "name": "nori",
+                "type": "directory",
+                "path": "nori/"
+            },
+            {
                 "name": "frameworks",
                 "type": "directory",
                 "path": "frameworks/"

@@ -1,6 +1,7 @@
 local player = require("yeva.player")
 local input = require("cyn.engine.input")
 local world = require("cyn.engine.viewport.world")
+local ImGui = require("imgui").ImGui
 
 ---@class yeva.player.behavior.move : yeva.player.behavior
 local M = player.behavior.define("move")
@@ -49,8 +50,8 @@ function M:frame()
     self.player.x = self.player.x + dx
     self.player.y = self.player.y + dy
     if self.keep_player_in_bounds then
-        self.player.x = math.max(math.min(self.player.x, world.current.pr), world.current.pl)
-        self.player.y = math.max(math.min(self.player.y, world.current.pt), world.current.pb)
+        self.player.x = math.max(math.min(self.player.x, world.current.pr - 4), world.current.pl + 4)
+        self.player.y = math.max(math.min(self.player.y, world.current.pt - 4), world.current.pb + 4)
     end
 
     self.slow_lh = self.slow_lh + ((self.is_focus and 1 or 0) - 0.5) * 0.3

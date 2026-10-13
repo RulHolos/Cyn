@@ -24,7 +24,7 @@ end
 local function set_common_text(rt, r, g, b)
     rt:setFillColor(lstg.Color(255, r, g, b))
     rt:setAlignment("left", "middle")
-    rt:setOutline(3, lstg.Color(255, 0, 0, 0))
+    rt:setOutline(1.5, lstg.Color(255, 0, 0, 0))
 end
 
 function w:init()

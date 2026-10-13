@@ -21,12 +21,9 @@ function GameExit()
     signals:Emit(signals.known_signals.GameExit)
 end
 
---local screen_set = false
-
 local function frame_objects()
     if DEBUG then
-        lstg.ObjFrame()
-        --lstg.PartialObjFrame(debug_data.frame_groups, debug_data.frame_world)
+        lstg.PartialObjFrame(debug_data.frame_groups, debug_data.frame_world)
     else
         lstg.ObjFrame()
     end

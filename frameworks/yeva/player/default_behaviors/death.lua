@@ -3,6 +3,7 @@ local audio_manager = require("cyn.engine.resources.audio_manager")
 local object = require("cyn.engine.objects")
 local task = require("cyn.foundation.task")
 local img = require("cyn.engine.resources.image")
+local ImGui = require("imgui").ImGui
 
 --#region death_eff
 
@@ -106,11 +107,14 @@ local states = {
     RESPAWN_WAIT = 6,
     RESPAWN = 7,
     ENTERING = 8,
+    RESET = 9,
 }
 
 function M:init()
     self.death_state = states.ALIVE
     self.death_timer = 0
+
+    self.ignore_death = false
 
     ---@private
     ---@type table<yeva.player.behavior.death.states, fun(self:yeva.player.behavior.death)>
@@ -119,6 +123,7 @@ function M:init()
         [states.HIDE] = self.on_frame_hide,
         [states.RESPAWN] = self.on_frame_respawn,
         [states.ENTERING] = self.on_frame_entering,
+        [states.RESET] = self.on_frame_reset,
     }
 
     ---@private
@@ -130,6 +135,7 @@ function M:init()
         [states.RESPAWN_WAIT] = 33,
         [states.RESPAWN] = 1,
         [states.ENTERING] = 49,
+        [states.RESET] = 1,
     }
 
     ---@private
@@ -140,7 +146,8 @@ function M:init()
         [states.HIDE] = states.RESPAWN_WAIT,
         [states.RESPAWN_WAIT] = states.RESPAWN,
         [states.RESPAWN] = states.ENTERING,
-        [states.ENTERING] = states.ALIVE,
+        [states.ENTERING] = states.RESET,
+        [states.RESET] = states.ALIVE,
     }
 end
 
@@ -174,8 +181,6 @@ end
 ---@private
 function M:on_frame_respawn()
     self.player.x = 0
-    --self.player.support.x = 0
-    --self.player.support.y = 0
     self.player.y = -236
     self.player.hide = false
 
@@ -185,6 +190,11 @@ end
 ---@private
 function M:on_frame_entering()
     self.player.y = -192 - 1.2 * (self.death_timer - 1)
+end
+
+---@private
+function M:on_frame_reset()
+    self.player.lock = false
 end
 
 ---@private
@@ -222,7 +232,8 @@ end
 ---
 ---Starts the deathbomb window immediately.
 function M:hit()
-    audio_manager.play_se("pldead00", 0.5)
+    self.player.lock = true
+    audio_manager.play_se("pldead00", 0.5, self.player:get_sound_pan())
     self:transition(states.DEATHBOMB_WINDOW)
 end
 
@@ -232,6 +243,7 @@ function M:cancel()
         return
     end
 
+    self.player.lock = false
     self:transition(states.ALIVE)
 end
 
@@ -253,6 +265,28 @@ function M:has_control()
     return state == states.ALIVE or state == states.DEATHBOMB_WINDOW
 end
 
+function M:colli(other)
+    if not self.ignore_death then
+        if self:is_alive() then
+            if self.player.protect == 0 then
+                self:hit()
+            end
+            if other.group == object.group.ENEMY_BULLET then
+                lstg.Del(other)
+            end
+        end
+    else
+        if self:is_alive() then
+            if self.player.protect == 0 then
+                audio_manager.play_se("pldead00", 0.5, self.player:get_sound_pan())
+            end
+            if other.group == object.group.ENEMY_BULLET then
+                lstg.Del(other)
+            end
+        end
+    end
+end
+
 function M:debug()
     if ImGui.Button("Kill") then
         self:hit()
@@ -267,6 +301,8 @@ function M:debug()
     if success then
         self.death_durations[states.DEATHBOMB_WINDOW] = math.clamp(value, 1, 60)
     end
+
+    _, self.ignore_death = ImGui.Checkbox("Ignore Death", self.ignore_death)
 end
 
 return M

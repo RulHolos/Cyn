@@ -2,7 +2,7 @@ local imgui_exists, imgui = pcall(require, "imgui")
 if not imgui_exists then
     lstg.Log(LOG.ERROR, "!! ImGui was invoked but doesn't exist !! (literally, how did you manage that)")
 end
-ImGui = imgui.ImGui
+local ImGui = imgui.ImGui
 
 ---@param vkey number
 ---@return fun() : boolean
@@ -43,23 +43,48 @@ local function layoutView(view)
         return
     end
 
-    local show = false
-    show, enabled = ImGui.Begin(view:getWindowName(), enabled)
-    view:setState(enabled)
+    local show, enabled = ImGui.Begin(view:getWindowName(), enabled)
+    if enabled ~= nil then
+        view:setState(enabled)
+    end
     if show then
         view:layout()
     end
     ImGui.End()
 end
 
+---@class cyn.debug.menu_node
+---@field children cyn.debug.menu_node[]
+---@field by_name table<string, cyn.debug.menu_node>
+---@field entries { id: string, layout: fun() }[]
+---@field name string
+
+---@return cyn.debug.menu_node
+local function newNode(name)
+    return { name = name, children = {}, by_name = {}, entries = {} }
+end
+
+---@param node cyn.debug.menu_node
+local function layoutNode(node)
+    for _, e in ipairs(node.entries) do
+        e.layout()
+    end
+    for _, child in ipairs(node.children) do
+        if ImGui.BeginMenu(child.name) then
+            layoutNode(child)
+            ImGui.EndMenu()
+        end
+    end
+end
+
 ---@class cyn.debug.manager
 local M = {
+    ---@type cyn.debug.menu_node Root of menus registered through addMenu.
+    menu_root = newNode(""),
     ---@type table<string, cyn.debug.view>
     view_collection = {},
     ---@type boolean
     show_menu = false,
-    ---@type string[]
-    view_categories = {},
     ---@type table<string, string> module name -> last known view id, tracks what loadViews has already registered
     loaded_modules = {}
 }
@@ -68,6 +93,9 @@ Cyn.imgui_manager = M
 ---@param view cyn.debug.view
 function M:addView(view)
     table.insert(self.view_collection, { view:getViewId(), view })
+    self:addMenu("view:" .. view:getViewId(), view:getMenuGroup(), function()
+        layoutViewmenuItem(view)
+    end)
 end
 
 ---@param view_id string Id of the view to remove.
@@ -75,6 +103,7 @@ function M:removeView(view_id)
     for i, v in ipairs(self.view_collection) do
         if v[1] == view_id then
             table.remove(self.view_collection, i)
+            self:removeMenu("view:" .. view_id)
             break
         end
     end
@@ -100,20 +129,65 @@ function M:loadViews(folder_path, module_patch)
         package.loaded[module_name] = nil
         local view = require(module_name)
 
-        lstg.Log(LOG.INFO, "Adding debug view from file: " .. file)
-        self:addView(view)
-        self.loaded_modules[module_name] = view:getViewId()
-    end
-
-    self:initializeCategories()
-end
-
-function M:initializeCategories()
-    for _, v in ipairs(self.view_collection) do
-        if not table.has_ivalue(self.view_categories, v[2].getMenuGroup()) then
-            table.insert(self.view_categories, v[2].getMenuGroup())
+        if type(view) == "table" and view.getViewId then
+            lstg.Log(LOG.INFO, "Adding debug view from file: " .. file)
+            self:addView(view)
+            self.loaded_modules[module_name] = view:getViewId()
+        else
+            self.loaded_modules[module_name] = nil
         end
     end
+end
+
+---Registers content inside a main menu bar independently of any other debug views.
+---
+---`path` can be nested, in that case use a `/` to separate the levels (e.g. "Yeva/Tools")
+---@param id string
+---@param path string|string[]
+---@param layout fun()
+function M:addMenu(id, path, layout)
+    self:removeMenu(id)
+
+    if type(path) == "string" then
+        local parts = {}
+        for part in path:gmatch("[^/]+") do
+            table.insert(parts, part)
+        end
+        path = parts
+    end
+    assert(#path > 0, "menu path can't be empty")
+
+    local node = self.menu_root
+    for _, name in ipairs(path) do
+        local child = node.by_name[name]
+        if not child then
+            child = newNode(name)
+            node.by_name[name] = child
+            table.insert(node.children, child)
+        end
+        node = child
+    end
+    table.insert(node.entries, { id = id, layout = layout })
+end
+
+---@param id string
+function M:removeMenu(id)
+    local function strip(node)
+        for i = #node.entries, 1, -1 do
+            if node.entries[i].id == id then
+                table.remove(node.entries, i)
+            end
+        end
+        for i = #node.children, 1, -1 do
+            local child = node.children[i]
+            strip(child)
+            if #child.entries == 0 and #child.children == 0 then
+                table.remove(node.children, i)
+                node.by_name[child.name] = nil
+            end
+        end
+    end
+    strip(self.menu_root)
 end
 
 function M:frame()
@@ -121,7 +195,6 @@ function M:frame()
         return
     end
 
-    imgui.backend.NewFrame(self.show_menu)
     for _, v in ipairs(self.view_collection) do
         v[2]:frame()
     end
@@ -146,18 +219,11 @@ function M:layout()
         return
     end
 
-    ImGui.NewFrame()
     if self.show_menu then
         if ImGui.BeginMainMenuBar() then
-            for _, v in ipairs(self.view_categories) do
-                if ImGui.BeginMenu(v) then
-                    table.foreach_ipairs(self.view_collection,
-                        function(view, i)
-                            return view[2].getMenuGroup() == v
-                        end,
-                        function(view, i)
-                            layoutViewmenuItem(view[2])
-                        end)
+            for _, root in ipairs(self.menu_root.children) do
+                if ImGui.BeginMenu(root.name) then
+                    layoutNode(root)
                     ImGui.EndMenu()
                 end
             end
@@ -176,37 +242,31 @@ function M:layout()
         end
 
         if b_show_demo_window then
-            b_show_demo_window = imgui.ImGui.ShowDemoWindow(b_show_demo_window)
+            b_show_demo_window = imgui.ImGui.ShowDemoWindow(b_show_demo_window) or false
         end
         if b_show_memuse_window and imgui.backend.ShowMemoryUsageWindow then
-            b_show_memuse_window = imgui.backend.ShowMemoryUsageWindow(b_show_memuse_window)
+            b_show_memuse_window = imgui.backend.ShowMemoryUsageWindow(b_show_memuse_window) or false
         end
         if b_show_framept_window and imgui.backend.ShowFrameStatistics then
-            b_show_framept_window = imgui.backend.ShowFrameStatistics(b_show_framept_window)
+            b_show_framept_window = imgui.backend.ShowFrameStatistics(b_show_framept_window) or false
         end
 
         if b_show_testinput_window and imgui.backend.ShowTestInputWindow then
-            b_show_testinput_window = imgui.backend.ShowTestInputWindow(b_show_testinput_window)
+            b_show_testinput_window = imgui.backend.ShowTestInputWindow(b_show_testinput_window) or false
         end
 
         if b_show_resmgr_window and imgui.backend.ShowResourceManagerDebugWindow then
-            b_show_resmgr_window = imgui.backend.ShowResourceManagerDebugWindow(b_show_resmgr_window)
+            b_show_resmgr_window = imgui.backend.ShowResourceManagerDebugWindow(b_show_resmgr_window) or false
         end
 
         for _, v in ipairs(self.view_collection) do
             layoutView(v[2])
         end
     end
-    ImGui.EndFrame()
 end
 
-function M:render()
-    if not imgui_exists then
-        return
-    end
-
-    ImGui.Render()
-    imgui.backend.RenderDrawData()
+function M:isActive()
+    return self.show_menu
 end
 
 M:loadViews("library/cyn/tools/debug/views/", "library.cyn.tools.debug.views.")
@@ -226,18 +286,6 @@ function V:setState(enable) self.enabled = enable end
 function V:frame() end
 function V:layout() end
 
-M:initializeCategories()
-
-local signals = require("cyn.foundation.signals")
-signals:Register("ImGuiRender", signals.known_signals.RenderFunc, function()
-    M:render()
-end, signals.LOW_PRIORITY, M)
-
-signals:Register("ImGuiFrame", signals.known_signals.BeforeFrameFunc, function()
-    M:frame()
-end, signals.LOW_PRIORITY, M)
-signals:Register("ImGuiLayout", signals.known_signals.AfterFrameFunc, function()
-    M:layout()
-end, signals.LOW_PRIORITY, M)
+require("cyn.tools.imgui_host"):register("debug", M, 10)
 
 return M

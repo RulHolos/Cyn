@@ -23,7 +23,7 @@ function w:init()
     self.fps = lstg.RichText.createFromPool(self.font.name, 16)
         :setAlignment("center", "top")
         :setFillColor(lstg.Color(255, 200, 200, 200))
-        :setOutline(3, lstg.Color(255, 0, 0, 0))
+        :setOutline(1.5, lstg.Color(255, 0, 0, 0))
         :setText(get_stage_label())
 
     local wo = world.current

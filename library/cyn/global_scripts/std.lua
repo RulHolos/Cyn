@@ -338,3 +338,53 @@ function lstg.MsgBoxError(msg, title, exit)
 		QuitFlag = true
 	end
 end
+
+-------------------------------- Try-catch thingy from C# but ported to lua because I'm quirky like that
+
+local function defaultErrorHandler(err)
+	local tb = debug.traceback("", 3)
+	return string.format("%s\n<=== inner traceback ===>\n%s\n<=======================>", tostring(err), tb)
+end
+
+local function catchErrorHandler(err)
+    local tb = debug.traceback("", 3)
+    return string.format("error in catch block: %s\n<=== inner traceback ===>\n%s\n<=======================>", tostring(err), tb)
+end
+
+---Performs a C#-style try-catch-finally operation in Lua.
+---
+---Do not call repeatedly since it uses xpcall, which is slow.
+---@param try function
+---@param catch function?
+---@param finally function?
+function lstg.try_catch(try, catch, finally)
+	assert(type(try) == "function", "invalid argument: 'try' function is required.")
+    assert(catch == nil or type(catch) == "function", "invalid argument: 'catch' must be a function or nil.")
+    assert(finally == nil or type(finally) == "function", "invalid argument: 'finally' must be a function or nil.")
+
+	local unpack = unpack or table.unpack
+
+	local tryResults = { xpcall(try, defaultErrorHandler) }
+	local ok = tryResults[1]
+
+	if finally then
+		finally()
+	end
+
+	if ok then
+		return unpack(tryResults, 2)
+	end
+
+	local err = tryResults[2]
+	if not catch then
+		error("unhandled error: " .. tostring(err))
+	end
+
+	local catchResults = { xpcall(catch, catchErrorHandler, err) }
+
+	if catchResults[1] then
+		return unpack(catchResults, 2)
+	else
+		error(catchResults[2])
+	end
+end

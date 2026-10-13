@@ -53,19 +53,30 @@ end
 ---@param a number? horizontal size of collision
 ---@param b number? vertical size of collision (same as `a` if nil.)
 ---@param rect boolean? whether to use rectangular collision instead of circular.
+---@param name string? unique name of the image. Defaults to the texture name, suffixed with the sub-region if one is given.
 ---@return resource.image Image
-function M.from_texture(tex, x, y, width, height, a, b, rect)
+function M.from_texture(tex, x, y, width, height, a, b, rect, name)
     local img = MakeInstance(M)
-    local name
+    local has_region = x ~= nil or y ~= nil or width ~= nil or height ~= nil
+    local function resolve_name(tex_name)
+        if name then
+            return common.get_typed_name("img", name)
+        end
+        local n = common.get_typed_name("img", tex_name)
+        if has_region then
+            n = string.format("%s@%s,%s,%s,%s", n, x or 0, y or 0, width or "", height or "")
+        end
+        return n
+    end
 
     if type(tex) == "string" then
         local w, h = lstg.GetTextureSize(tex)
-        name = common.get_typed_name("img", tex)
+        name = resolve_name(tex)
         lstg.LoadImage(name, tex, x or 0, y or 0, width or w, height or h, a or 0, b or a or 0, rect or false)
         img.width = width or w
         img.height = height or h
     elseif type(tex) == "table" and (getmetatable(tex) == texture or getmetatable(tex) == render_target) then
-        name = common.get_typed_name("img", tex.name)
+        name = resolve_name(tex.name)
         lstg.LoadImage(name, tex.name, x or 0, y or 0, width or tex.width, height or tex.height, a or 0, b or a or 0, rect or false)
         img.width = width or tex.width
         img.height = height or tex.height

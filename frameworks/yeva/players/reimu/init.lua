@@ -1,5 +1,6 @@
 local object = require("cyn.engine.objects")
 local image_atlas = require("cyn.engine.resources.image_atlas")
+local img = require("cyn.engine.resources.image")
 local view = require("cyn.engine.viewport.view")
 local player = require("yeva.player")
 
@@ -13,6 +14,12 @@ local b_animation = require(patch .. "animation")
 local b_power = require(patch .. "power")
 local b_grazer = require(patch .. "grazer")
 local b_miss = require(patch .. "miss")
+local b_supports = require(patch .. "supports")
+
+---@param self yeva.player.behavior.supports.support
+local function default_supports_frame(self)
+    self.rot = self.parent.player.timer * 3
+end
 
 --#endregion
 
@@ -45,6 +52,39 @@ function M:init()
     local collect = self:attach_behavior(b_collect)
     local grazer = self:attach_behavior(b_grazer)
     local miss = self:attach_behavior(b_miss)
+
+    --#region Supports
+    ---@type yeva.player.behavior.supports
+    local supports = self:attach_behavior(b_supports)
+
+    local orb_img = self.atlas:add_image("orb", 64, 144, 16, 16)
+
+    --Each entry is { ux, uy, fx, fy }.
+    local orb_positions = {
+        nil,
+        { { 0, 36, 0, 24 } },
+        { { -32, 0, -12, 24 }, { 32, 0, 12, 24 } },
+        { { -32, -8, -16, 20 }, { 0, -32, 0, 28 }, { 32, -8, 16, 20 } },
+        { { -36, -12, -16, 20 }, { -16, -32, -6, 28 }, { 16, -32, 6, 28 }, { 36, -12, 16, 20 } },
+    }
+
+    supports:make_formation(
+        { { power = 0, count = 0 }, { power = 100, count = 1 }, { power = 200, count = 2 }, { power = 300, count = 3 }, { power = 400, count = 4 } },
+        function(index, count, focused)
+            local entry = orb_positions[count + 1][index]
+            if focused then
+                return { x = entry[3], y = entry[4] }
+            else
+                return { x = entry[1], y = entry[2] }
+            end
+        end,
+        function(inst)
+            inst.img = orb_img
+            inst.frame = default_supports_frame
+        end
+    )
+
+    --#endregion
 
     self:set_behavior_deps()
 end

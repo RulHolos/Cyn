@@ -4,6 +4,7 @@ local ImGui = imgui.ImGui
 local ImVec2 = imgui.ImVec2
 local ImKey = imgui.ImGuiKey
 local ImWindowFlags = imgui.ImGuiWindowFlags
+local ImGuiChildFlags = imgui.ImGuiChildFlags
 local ImInputTextFlags = imgui.ImGuiInputTextFlags
 local ImTextBuffer = imgui.ImGuiTextBuffer
 local ImStyleVar = imgui.ImGuiStyleVar
@@ -55,7 +56,7 @@ function Console:layout()
     ImGui.Text('Enter lua code, prefix with "=" to return its value')
 
     local footer_h = ImGui.GetStyle().ItemSpacing.y + ImGui.GetFrameHeightWithSpacing()
-    ImGui.BeginChild('ScrollRegion', ImVec2(0, -footer_h), 0, ImWindowFlags.HorizontalScrollbar)
+    ImGui.BeginChild('ScrollRegion', ImVec2(0, -footer_h), ImGuiChildFlags.None, ImWindowFlags.HorizontalScrollbar)
     do
         ImGui.PushStyleVar(ImStyleVar.ItemSpacing, ImVec2(4, 1))
         for i = 1, #logs do

@@ -9,7 +9,7 @@ local ImGui = imgui.ImGui
 local M = {}
 
 function M:getWindowName() return "Player Debugger" end
-function M:getMenuGroup() return "Tools" end
+function M:getMenuGroup() return "Yeva/Tools" end
 function M:getViewId() return "view.Player" end
 function M:getEnabled() return self.enabled end
 ---@param v boolean

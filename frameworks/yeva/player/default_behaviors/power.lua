@@ -6,6 +6,7 @@ local audio_manager = require("cyn.engine.resources.audio_manager")
 local resource_manager = require("yeva.db.resource_manager")
 local power = require("yeva.objs.items.power")
 local full_power = require("yeva.objs.items.full_power")
+local ImGui = require("imgui").ImGui
 
 ---@class yeva.player.behavior.power : yeva.player.behavior
 local M = player.behavior.define("power")
@@ -84,6 +85,9 @@ function M:debug()
     local success, value = ImGui.InputInt("Maximum power", self.max_power, 1, math.INF)
     if success then
         self.max_power = math.clamp(value, self.min_power, math.huge)
+        if self.current_power > self.max_power then
+            self.current_power = self.max_power
+        end
     end
 end
 

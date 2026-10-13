@@ -1,6 +1,7 @@
 ---@class cyn.class
 local M = {}
 
+---Calls self:init() if it exists, otherwise calls the init method of the superclass if it exists.
 local function classCreate(instance, class, ...)
     local ctor = rawget(class, "init")
     if ctor then

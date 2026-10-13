@@ -81,7 +81,7 @@ function item:colli(other)
             self.class.collect(self, other)
         end
         lstg.Kill(self)
-        audio_manager.play_se("item00", 0.3, self.x / (world._default.play.w / 2))
+        audio_manager.play_se("item00", 0.3, self:get_sound_pan())
     end
 end
 

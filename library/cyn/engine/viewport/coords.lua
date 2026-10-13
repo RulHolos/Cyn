@@ -1,5 +1,6 @@
 local screen = require("cyn.engine.viewport.screen")
 local settings_manager = require("cyn.foundation.settings_manager")
+local world = require("cyn.engine.viewport.world")
 
 ---@class cyn.viewport.coords
 local M = {}
@@ -8,7 +9,7 @@ local M = {}
 ---@param y number
 ---@return number, number
 function M:world_to_ui(x, y)
-    local w = screen.world
+    local w = world.current
     local ux = w.scrl + (w.scrr - w.scrl) * (x - w.l) / (w.r - w.l)
     local uy = w.scrb + (w.scrt - w.scrb) * (y - w.b) / (w.t - w.b)
     return ux, uy
@@ -18,7 +19,7 @@ end
 ---@param uy number
 ---@return number, number
 function M:ui_to_world(ux, uy)
-    local w = screen.world
+    local w = world.current
     local x = w.l + (ux - w.scrl) * (w.r - w.l) / (w.scrr - w.scrl)
     local y = w.b + (uy - w.scrb) * (w.t - w.b) / (w.scrt - w.scrb)
     return x, y
@@ -29,7 +30,7 @@ end
 ---@return number, number
 function M:world_to_screen(x, y)
     local sc = screen
-    local w = sc.world
+    local w = world.current
     local settings = settings_manager:get()
     local sx, sy
 

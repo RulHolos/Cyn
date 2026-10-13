@@ -1,3 +1,6 @@
+local task = require("cyn.foundation.task")
+local tween = require("cyn.foundation.tween")
+
 --- Class system inspired by Cyanlib (because I love your way of doing it)
 
 ---@class cyn.object : lstg.object
@@ -8,6 +11,10 @@ M.group, M.layer = pair[1], pair[2]
 
 ---@param self cyn.object
 local noop = function(self) end
+local default_frame = function(self)
+    task.exec(self)
+    tween.Do(self)
+end
 local all_classes = {}
 
 ---Creates a new game object of the specified class.
@@ -29,7 +36,7 @@ local object = {
     is_class = true,
     init = noop,
     del = noop,
-    frame = noop,
+    frame = default_frame,
     render = lstg.DefaultRenderFunc,
     colli = noop,
     kill = noop,
@@ -54,7 +61,7 @@ end
 function M.define(base, define, sort)
     base = base or object
     local result = {
-        noop, noop, noop, lstg.DefaultRenderFunc, noop, noop,
+        noop, noop, default_frame, lstg.DefaultRenderFunc, noop, noop,
         is_class = true,
         base = base, new = M.new, define = M.define }
 
@@ -89,14 +96,6 @@ end
 
 local internals = require("cyn.engine.objects.internal")
 
-setmetatable(M, {
-    __index = function(k, v)
-        local internal = internals[v]
-        if internal then
-            rawset(k, v, internal)
-            return internal
-        end
-    end
-})
+setmetatable(object, { __index = internals })
 
 return M

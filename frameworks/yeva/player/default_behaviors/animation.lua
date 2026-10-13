@@ -1,4 +1,5 @@
 local player = require("yeva.player")
+local ImGui = require("imgui").ImGui
 
 ---@class yeva.player.behavior.animation.imgs.named
 ---@field normal resource.image[] Neutral cycling frames.

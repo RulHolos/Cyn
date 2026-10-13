@@ -8,7 +8,8 @@ local M = {
     cached_strings = {},
     ---@type table<string, fun(relative_path:string)[]>
     change_listeners = {},
-    parser = require("cyn.presentation.cdf.parser")
+    parser = require("cyn.presentation.cdf.parser"),
+    writer = require("cyn.presentation.cdf.writer")
 }
 
 function M.cache_key(relative_path, block_id, key)

@@ -1,3 +1,5 @@
+local world = require("cyn.engine.viewport.world")
+
 ---@class cyn.object
 local M = {}
 
@@ -39,6 +41,13 @@ function M.stop_mov(self)
     self.vx, self.vy = 0, 0
     self.ax, self.ay = 0, 0
     self.ag = 0
+end
+
+---Gets the sound pan based on the object's x position.
+---@param self cyn.object
+---@return number
+function M.get_sound_pan(self)
+    return (self.x / (world._default.play.w / 2)) / 2
 end
 
 return M

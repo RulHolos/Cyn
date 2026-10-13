@@ -5,11 +5,11 @@ local signals = require("cyn.foundation.signals")
 local view = require("cyn.engine.viewport.view")
 
 local render_tex = tex.from_file("cyn/tools/render_colli.png")
-local rect = img.from_texture(render_tex, 0, 0, 128, 128)
-local rect1 = img.from_texture(render_tex, 0, 0, 32, 128)
-local rect2 = img.from_texture(render_tex, 32, 0, 64, 128)
-local rect3 = img.from_texture(render_tex, 96, 0, 32, 128)
-local ring = img.from_texture(render_tex, 130, 0, 128, 128)
+local rect = img.from_texture(render_tex, 0, 0, 128, 128, nil, nil, nil, "rect")
+local rect1 = img.from_texture(render_tex, 0, 0, 32, 128, nil, nil, nil, "rect1")
+local rect2 = img.from_texture(render_tex, 32, 0, 64, 128, nil, nil, nil, "rect2")
+local rect3 = img.from_texture(render_tex, 96, 0, 32, 128, nil, nil, nil, "rect3")
+local ring = img.from_texture(render_tex, 130, 0, 128, 128, nil, nil, nil, "ring")
 
 local function match_base(class, match)
     if class == match then
@@ -62,13 +62,11 @@ function M.render()
             rect2:set_color(c)
             rect3:set_color(c)
             ring:set_color(c)
-            local bc = lstg.Color(c.a * 0.6, c.r, c.b, c.g)
+            --local bc = lstg.Color(c.a * 0.6, c.r, c.b, c.g)
             for _, unit in lstg.ObjList(M.list[i][1]) do
                 if unit.rect == true then
-                    print("rect")
                     rect:render(unit.x, unit.y, unit.rot, unit.a / 64, unit.b / 64)
                 else
-                    print("ring")
                     ring:render(unit.x, unit.y, unit.rot, unit.a / 64, unit.b / 64)
                 end
             end
